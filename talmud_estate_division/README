@@ -1,0 +1,3 @@
+Talmud Estate Division is described in "How the Talmud Divides an Estate Among Creditors" and is summarized in Presh Talwalker's post "How Game Theory Solved a Religious Mystery" on mindyourdecisions.com (2008). In very brief summary, it describes an algorithm to determine distribution of insufficient funds to multiple creditors, using the principle of equal division of contested sum.
+
+This script implements the algorithm as it is described in the blog post.
