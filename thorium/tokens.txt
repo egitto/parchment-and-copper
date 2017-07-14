@@ -1,3 +1,0 @@
-MzM1MjY5MTI2MjUzNTc2MTky.DEnTRA.-sYDfCkc9cJR4tX6zucsvIaCK40
-335269126253576192
-https://discordapp.com/oauth2/authorize?&client_id=335269126253576192&scope=bot&permissions=0
