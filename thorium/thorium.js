@@ -10,14 +10,6 @@ var variable_storage = 'thorium_variables.JSON'
 fs = require('fs')
 var auth_discord_thorium = JSON.parse(fs.readFileSync('/home/arthur/.auth/thorium.JSON'))['auth_discord_thorium']
 
-
-function write_text_file(file,text){
-	fs.writeFile(file, text, function(err){
-		if (err) throw err
-		console.log('wrote to file')
-	})
-}
-
 Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
 
 x = ''+fs.readFileSync(variable_storage)
@@ -27,6 +19,7 @@ if (!x){
 }else{
 	x = JSON.parse(x)
 }
+
 var watched_emojii = new Set(x.watched_emojii)
 var obey_roles = new Set(x.obey_roles)
 var threshold = x.threshold
@@ -45,7 +38,7 @@ function change_threshold(value){
 }
 
 function save_parameters(){
-	write_text_file(variable_storage,JSON.stringify(all_data))
+	fs.writeFile(variable_storage,JSON.stringify(all_data))
 }
 
 console.log(JSON.stringify(all_data))
