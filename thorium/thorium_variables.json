@@ -1,1 +1,20 @@
-{"watched_emojii":["🗒","🤖","📓","📔"],"log_channel_name":"topicis-logs","threshold":"2","obey_roles":["consuls","conifer","mods"],"flag_logged_emoji":"🗒"}
+{
+  "watched_emojii": [
+    "🗒",
+    "🤖",
+    "📓",
+    "📔"
+  ],
+  "log_channel_name": "topicis-logs",
+  "threshold": "2",
+  "obey_roles": [
+    "consuls",
+    "conifer",
+    "mods"
+  ],
+  "flag_logged_emoji": "🗒",
+  "obey_forever_roles": [
+    "consuls",
+    "conifer"
+  ]
+}
