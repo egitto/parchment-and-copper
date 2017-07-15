@@ -66,9 +66,10 @@ client.on('message', msg => {
 }) 
 
 function parse_command_phrase_curried(phrase){
+		// lmao this is even worse than before
 		var parse = curry(function(new_parameter_regex,text_response_function,new_value_function,keyword_regex,parameter_name){
 			if (!phrase.match(keyword_regex)) {return}
-			if (! x = phrase.match(new_parameter_regex)) {return}
+			if (! (x = phrase.match(new_parameter_regex))) {return}
 			x = x[0]
 			all_data[parameter_name] = y = new_value_function(x,all_data[parameter_name])
 			return {val: y, text: text_response_function(y)}
@@ -78,8 +79,10 @@ function parse_command_phrase_curried(phrase){
 		var new_parameter_regex_base = parse(/[^\b]*$/)
 		var set_base = new_parameter_regex_base((x,new_value)=>set_to_string(new_value))
 		var add_set = set_base((x,old_value)=>old_value.add(x))
+
 		watched_emojii = add_set(/^watch .*/)('watched_emojii') || watched_emojii
 		obey_roles = add_set(/^obey .*/)('obey_roles') || obey_roles
+
 		var subtract_set = set_base((x,old_value)=>old_value.delete(x))
 		watched_emojii = subtract_set(/^watch .*/)('watched_emojii') || watched_emojii
 		obey_roles = subtract_set(/^obey .*/)('obey_roles') || obey_roles
