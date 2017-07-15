@@ -3,10 +3,11 @@
     "🗒",
     "🤖",
     "📓",
-    "📔"
+    "📔",
+    "💾"
   ],
   "log_channel_name": "topicis-logs",
-  "threshold": "2",
+  "threshold": "1",
   "obey_roles": [
     "consuls",
     "conifer",
