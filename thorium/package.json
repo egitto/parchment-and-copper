@@ -1,0 +1,23 @@
+{
+  "name": "thorium",
+  "version": "0.1.0",
+  "description": "A simple bot based on discord.js for logging messages in discord servers that have recieved reactions from users",
+  "main": "thorium.js",
+  "dependencies": {
+    "async": "^2.5.0",
+    "discord.js": "^12.0.0-dev"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "discord",
+    "api",
+    "bot",
+    "node",
+    "discordapp"
+  ],
+  "author": "Arthur Egitto",
+  "license": "ISC"
+}
