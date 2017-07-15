@@ -1,25 +1,16 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 fs = require('fs')
+curry = require('curry')
 
 var variable_storage_path = 'thorium_variables.json'
 var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
 client.login(auth_discord_thorium)
-var default_parameters = {"watched_emojii":["🗒","🤖","📓","📔"],"log_channel_name":"topicis-logs","threshold":2,"obey_roles":["mods","moderators"],"flag_logged_emoji":"🗒","obey_forever_roles":["consuls","conifer"]}
 
 // Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
 
 x = '' + fs.readFileSync(variable_storage_path)
-if (!x){
-	x = default_parameters
-	console.log('using defaults...')
-}else{
-	x = JSON.parse(x)
-}
-
-client.on('ready', () => {
-  console.log('I am ready!')
-}) 
+x = JSON.parse(x)
 
 var watched_emojii = new Set(x.watched_emojii)
 var obey_roles = new Set(x.obey_roles)
@@ -50,11 +41,15 @@ function set_to_string(set){
 
 function save_parameters(){
 	var JSON_pretty = x => JSON.stringify(x,null,'  ')
-	fs.writeFile(variable_storage_path,JSON_pretty(all_data))
+	fs.writeFileSync(variable_storage_path,JSON_pretty(all_data))
 }
 
 console.log(JSON.stringify(all_data))
 console.log('loading...')
+
+client.on('ready', () => {
+  console.log('I am ready!')
+}) 
 
 client.on('message', msg => {
 	if (msg.content.match(/^[Tt]horium$/)) {
@@ -69,6 +64,28 @@ client.on('message', msg => {
 		save_parameters()
 	}
 }) 
+
+function parse_command_phrase_curried(phrase){
+		var parse = curry(function(new_parameter_regex,text_response_function,new_value_function,keyword_regex,parameter_name){
+			if (!phrase.match(keyword_regex)) {return}
+			if (! x = phrase.match(new_parameter_regex)) {return}
+			x = x[0]
+			all_data[parameter_name] = y = new_value_function(x,all_data[parameter_name])
+			return {val: y, text: text_response_function(y)}
+		})
+		threshold = parse(/[\d]+$/)(x => {x})(x => {x})(/^threshold .*/)('threshold') || threshold
+		log_channel_name = parse(/[^ ]*$/)(x => {x})(x => {x})(/^change log channel .*/)('log_channel_name') || log_channel_name
+		var new_parameter_regex_base = parse(/[^\b]*$/)
+		var set_base = new_parameter_regex_base((x,new_value)=>set_to_string(new_value))
+		var add_set = set_base((x,old_value)=>old_value.add(x))
+		watched_emojii = add_set(/^watch .*/)('watched_emojii') || watched_emojii
+		obey_roles = add_set(/^obey .*/)('obey_roles') || obey_roles
+		var subtract_set = set_base((x,old_value)=>old_value.delete(x))
+		watched_emojii = subtract_set(/^watch .*/)('watched_emojii') || watched_emojii
+		obey_roles = subtract_set(/^obey .*/)('obey_roles') || obey_roles
+
+
+}
 
 function parse_command_phrase(phrase){
 		// what follows is disgusting, avert your eyes.

@@ -5,6 +5,7 @@
   "main": "thorium.js",
   "dependencies": {
     "async": "^2.5.0",
+    "curry": "^1.2.0",
     "discord.js": ">=11.0.0-dev"
   },
   "devDependencies": {},
