@@ -1,24 +1,26 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
-
-client.on('ready', () => {
-  console.log('I am ready!')
-}) 
-
-var variable_storage = 'thorium_variables.JSON'
-
 fs = require('fs')
-var auth_discord_thorium = JSON.parse(fs.readFileSync('/home/arthur/.auth/thorium.JSON'))['auth_discord_thorium']
+
+var variable_storage_path = 'thorium_variables.json'
+var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
+client.login(auth_discord_thorium)
+var default_parameters = {"watched_emojii":["🗒","🤖","📓","📔"],"log_channel_name":"topicis-logs","threshold":2,"obey_roles":["consuls","conifer","mods","moderators"],"flag_logged_emoji":"🗒"}
+var unchangeable_owners = ["consuls","conifer"]
 
 Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
 
-x = ''+fs.readFileSync(variable_storage)
+x = ''+fs.readFileSync(variable_storage_path)
 if (!x){
-	x = {"watched_emojii":["❤","👍","🗒","🤖","📓","📔"],"log_channel_name":"topicis-logs","threshold":1,"obey_roles":["consuls","conifer","mods","standin-mod-role"],"flag_logged_emoji":"🗒"}
+	x = default_parameters
 	console.log('using defaults...')
 }else{
 	x = JSON.parse(x)
 }
+
+client.on('ready', () => {
+  console.log('I am ready!')
+}) 
 
 var watched_emojii = new Set(x.watched_emojii)
 var obey_roles = new Set(x.obey_roles)
@@ -38,7 +40,7 @@ function change_threshold(value){
 }
 
 function save_parameters(){
-	fs.writeFile(variable_storage,JSON.stringify(all_data))
+	fs.writeFile(variable_storage_path,JSON.stringify(all_data))
 }
 
 console.log(JSON.stringify(all_data))
@@ -47,7 +49,6 @@ console.log('loading...')
 client.on('message', msg => {
 	if (msg.content.match(/^[Tt]horium$/)) {
     safe_reply(msg, 'I can serve. \nthreshold: '+threshold+'\nwatched emoji:  '+[...watched_emojii]+'\ncontrol roles: '+[...obey_roles]+'\nlog channel: '+log_channel_name)
-    // safe_reply(msg, 'I can serve.\n'+JSON.stringify(all_data))
     // console.log(msg.channel.guild)
   }
   // console.log(msg.member.roles)
@@ -84,7 +85,7 @@ function parse_command_phrase(phrase){
 	  var x = /^disobey (.+)$/
 		if (phrase.match(x)) {
 			obey_roles.delete(phrase.replace(x,'$1'))
-			obey_roles.add('consuls').add('conifer')
+			unchangeable_owners.map(function(owner){obey_roles.add(owner)})
 			return ('New control roles: '+[...obey_roles])
 		}
 	  var x = /^change log channel (.+)$/
@@ -142,5 +143,3 @@ client.on('messageReactionAdd', messageReaction => {
 		}
 	}
 }) 
-
-client.login(auth_discord_thorium)
