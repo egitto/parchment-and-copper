@@ -3,15 +3,14 @@
     "🗒",
     "🤖",
     "📓",
-    "📔",
-    "💾"
+    "📔"
   ],
   "log_channel_name": "topicis-logs",
   "threshold": "1",
   "obey_roles": [
     "consuls",
-    "conifer",
-    "mods"
+    "mods",
+    "conifer"
   ],
   "flag_logged_emoji": "🗒",
   "obey_forever_roles": [
