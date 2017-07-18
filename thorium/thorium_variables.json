@@ -10,11 +10,13 @@
   "obey_roles": [
     "consuls",
     "mods",
-    "conifer"
+    "conifer",
+    "me"
   ],
   "flag_logged_emoji": "🗒",
   "obey_forever_roles": [
     "consuls",
     "conifer"
-  ]
+  ],
+  "managed_roles": []
 }

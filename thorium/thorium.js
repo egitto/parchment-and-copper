@@ -29,11 +29,11 @@ function set_globals_from_json(json){
 set_globals_from_json('' + fs.readFileSync(variable_storage_path))
 
 function array_to_string(arr){
-  return arr.reduce(function(accumulator,item){return accumulator + ', ' + item})
+  return arr.reduce(function(accumulator,item){return accumulator + item + ', '},'')
 }
 
 function set_to_pretty_string(set){
-  return [...set].reduce(function(accumulator,item){return accumulator + ', ' + item})
+  return [...set].reduce(function(accumulator,item){return accumulator + item + ', ' },'')
 }
 
 var JSON_pretty = x => JSON.stringify(x,null,'  ')
@@ -46,26 +46,29 @@ client.on('ready', () => {
   console.log('I am ready!')
 }) 
 
-client.on('message', msg => {
-  if (msg.content.match(/^[Tt]horium$/)) {
-    reply(msg, 'I can serve. \nthreshold: ' + globals.threshold + '\nwatched emoji:  ' + set_to_pretty_string(globals.watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals.obey_roles) + '\nlog channel: ' + globals.log_channel_name)
-    // console.log(msg.channel.guild)
+client.on('message', message => {
+  if (message.content.match(/^[Tt]horium$/)) {
+    reply(message, 'I can serve. \nthreshold: ' + globals.threshold + '\nwatched emoji:  ' + set_to_pretty_string(globals.watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals.obey_roles) + '\nlog channel: ' + globals.log_channel_name)
+    // console.log(message.channel.guild)
   }
   x = /^topicis:? (.*)/
-  if (msg.content.match(x)){
+  if (message.content.match(x)){
     // we don't want the bot to say 'topicis' because that interferes with users searching for that string
-    var new_message = Object.create(msg)
-    new_message.content = msg.content.replace(x,'topicis_bot: $1')
+    var new_message = Object.create(message)
+    new_message.content = message.content.replace(x,'topicis_bot: $1')
     log_message(new_message)
   }
-  // console.log(msg.member.roles)
-  var obey_this = !!(msg.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
-  console.log(obey_this + ' ' + msg.member.user.username + '/' + msg.member.nickname + '\n  ' + msg.content)
-  if (obey_this &&(msg.content.match(/^[Tt]horium [^{}()\\]*$/))){
-    parse_command_phrase(msg)
-    save_parameters()
+  // console.log(message.member.roles)
+  var obey_this = !!(message.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
+  console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
+  if (message.content.match(/^[Tt]horium [^{}()\\]*$/)){
+    parse_unprivileged_command(message)
+    if (obey_this){
+      parse_command_phrase(message)
+      save_parameters()
+    }
   }
-  parse_unprivileged_command(msg)
+
 }) 
 
 function parse_command_phrase_curried(phrase){
@@ -94,37 +97,39 @@ function parse_command_phrase_curried(phrase){
 }
 
 function parse_unprivileged_command(message){
-    var phrase = msg.content.replace(/^[Tt]horium /,'')
-    var user = msg.author
-    var guild = msg.channel.guild
-    var x = /^add me to role (.+)$/
+    var phrase = message.content.replace(/^[Tt]horium /,'')
+    var user = message.member
+    var guild = message.channel.guild
+    var x = /^add me to (.+)$/
     if (phrase.match(x)) {
       var y = phrase.replace(x,'$1')
+      if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y)}
       globals.managed_roles.map((role) => {if ((role.name === y)&& !user.roles.has(role.id)) {
         user.addRole(role.id).then(()=>
           reply(message,"Role "+role.name+" added")
-        )}})
+        ).catch((err)=>reply(message,""+err))}})
     }
-    var x = /^remove me from role (.+)$/
+    var x = /^remove me from (.+)$/
     if (phrase.match(x)) {
       var y = phrase.replace(x,'$1')
+      if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y)}      
       globals.managed_roles.map((role) => {if ((role.name === y)&& user.roles.has(role.id)) {
-        user.removeRole(role).then(()=>
+        user.removeRole(role.id).then(()=>
           reply(message,"Role "+role.name+" removed")
-        )}})
+        ).catch((err)=>reply(message,""+err))}})
     }
     var x = /^role(s) help$/
     if (phrase.match(x)) {
       message.reply("I can add or remove members of these roles: " 
       +array_to_string(globals.managed_roles.map(r=>{return r.name}))
-      +"\nRequests:\n  add me to role $role\n  remove me from role $role"
-      +"\nCommands:\n  manage $role\n  unmanage $role")
+      +"\nRequests:\n  add me to $role\n  remove me from $role"
+      +"\nCommands:\n  manage $role\n  unmanage $role\nforce manage role")
     }
 }
 
 function parse_command_phrase(message){
     // what follows is disgusting, avert your eyes.
-    var phrase = msg.content.replace(/^[Tt]horium /,'')
+    var phrase = message.content.replace(/^[Tt]horium /,'')
     var response = null
     var x = /^threshold (\d+)$/
     if (phrase.match(x)) {
@@ -143,25 +148,32 @@ function parse_command_phrase(message){
     }
     var x = /^obey (.+)$/
     if (phrase.match(x)) {
-      globals.obey_roles.add(phrase.replace(x,'$1'))
-      response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
+      var y = phrase.replace(x,'$1')
+      if (!is_managing_role(y)){
+        globals.obey_roles.add(y)
+        response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
+      }else{response = 'Unable to assign control role: currently managing role '+y}
     }
     var x = /^disobey (.+)$/
     if (phrase.match(x)) {
       globals.obey_roles.delete(phrase.replace(x,'$1'))
       globals.obey_forever_roles.map(owner => {globals.obey_roles.add(owner)})
       response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
-    }    
+    }
+    var x = /^force manage (.+)$/
+    if (phrase.match(x)) {
+      y = phrase.replace(x,'$1')
+      manage_role(y,message,true)
+    }        
     var x = /^manage (.+)$/
     if (phrase.match(x)) {
-      y = phrase.replace(x,$1)
-      manage_role(y,message)
+      y = phrase.replace(x,'$1')
+      manage_role(y,message,false)
     }    
     var x = /^unmanage (.+)$/
     if (phrase.match(x)) {
-      globals.obey_roles.delete(phrase.replace(x,'$1'))
-      globals.obey_forever_roles.map(owner => {globals.obey_roles.add(owner)})
-      response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
+      y = phrase.replace(x,'$1')
+      unmanage_role(y,message) 
     }
     var x = /^change log channel (.+)$/
     if (phrase.match(x)) {
@@ -181,43 +193,46 @@ function parse_command_phrase(message){
     if (response) {reply(message,response)}
 }
 
-function manage_role(y,msg){
-  if (!globals.obey_roles.has(y) && !){
-    var named_roles = msg.channel.guild.roles.findAll('name',y)
-    if (named_roles.length > 0){
-      reply(msg,"Already exist role(s) with that name")
-    }else if (obey_roles.has(y)){
-      reply(msg,"Can't manage an obeyed role")}
-    else if(is_managing_role(y)){
-      reply(msg,"Already managing a role by that name")
-    } else {
-      msg.channel.guild.createRole({name: y}).then(role => {
+function manage_role(y,message,force){
+  var named_roles = message.channel.guild.roles.findAll('name',y)
+    if (globals.obey_roles.has(y)){
+      reply(message,"Can't manage an obeyed role")
+    }else if(is_managing_role(y)){
+      reply(message,"Already managing a role by that name")
+    }else if (named_roles.length > 0){
+      reply(message,"Already exist role(s) with that name; force?")
+      if (force && named_roles.length == 1){
+        globals.managed_roles.push(named_roles[0])
+        reply(message,"Forcing management anyway")
+      }
+    }else{
+      message.channel.guild.createRole({name: y, mentionable: true}).then((role) => {
         globals.managed_roles.push(role)
-        reply(msg,"New role "+y+" created")
-      })
+        reply(message,"New role "+y+" created")
+      }).catch((err)=>reply(message,"Error: "+err))
     }
-  }
 }
 
-function unmanage_role(y,msg){
-  var g = globals.managed_roles.filter(role=>{return role.name === y})
+function unmanage_role(role_name,message){
+  var g = globals.managed_roles.filter(role=>{return role.name !== role_name})
   globals.managed_roles = g
+  reply(message,"Now managing: "+g)
 }
 
 function is_managing_role(role_name){
-  return !globals.managed_roles.every(role=>{return role.name !=== y})
+  return !globals.managed_roles.every(role=>{return role.name !== role_name})
 }
 
-function reply(msg,content){
-  msg.reply(content,{disableEveryone: true}) 
+function reply(message,content){
+  message.reply(content,{disableEveryone: true}) 
 }
 
-function log_channel(msg){
-  return msg.guild.channels.find('name', globals.log_channel_name)
+function log_channel(message){
+  return message.guild.channels.find('name', globals.log_channel_name)
 }
 
-function report_error_on_servermeta(msg,errormessage){
-  var metachannel = msg.guild.channels.find('name', 'servermeta')
+function report_error_on_servermeta(message,errormessage){
+  var metachannel = message.guild.channels.find('name', 'servermeta')
   if (metachannel){
     metachannel.send(errormessage,{disableEveryone: true})
   }
@@ -228,24 +243,24 @@ function is_watched(emoji){
   // return true
 }
 
-function isnt_logged_yet(msg){
-  var logged_react = !!msg.reactions.find('me', true)
+function isnt_logged_yet(message){
+  var logged_react = !!message.reactions.find('me', true)
   console.log('already logged_react: '+ logged_react)
   return !logged_react
 }
 
-function log_message(msg,emoji_name){
-    // msg = messageReaction.message
+function log_message(message,emoji_name){
+    // message = messageReaction.message
   console.log(emoji_name)
   emoji_name = emoji_name || globals.flag_logged_emoji
-  var reply = emoji_name + ' at `' + msg.createdAt + '` in ' + msg.channel +', ' +msg.author + ' said:\n\n' + msg
-  // console.log(msg)
-  if (log_channel(msg)){
-    msg.react(globals.flag_logged_emoji)
-    log_channel(msg).send(reply,{disableEveryone: true}) 
+  var reply = emoji_name + ' at `' + message.createdAt + '` in ' + message.channel +', ' +message.author + ' said:\n\n' + message
+  // console.log(message)
+  if (log_channel(message)){
+    message.react(globals.flag_logged_emoji)
+    log_channel(message).send(reply,{disableEveryone: true}) 
     console.log('recorded ' + reply)
   }else{
-    report_error_on_servermeta(msg,'log channel ' + globals.log_channel_name + ' not found')
+    report_error_on_servermeta(message,'log channel ' + globals.log_channel_name + ' not found')
   }
 }
 
@@ -253,8 +268,8 @@ client.on('messageReactionAdd', messageReaction => {
   var emoji_name = messageReaction._emoji.name 
   var reacts = messageReaction.count
   console.log('reaction spotted: ' + emoji_name + ' in #' + messageReaction.message.channel.name)
-  msg = messageReaction.message
-  if(is_watched(emoji_name) && (reacts >= globals.threshold) && isnt_logged_yet(msg) && ('' + msg)){
-    log_message(msg,emoji_name)
+  message = messageReaction.message
+  if(is_watched(emoji_name) && (reacts >= globals.threshold) && isnt_logged_yet(message) && ('' + message)){
+    log_message(message,emoji_name)
   }
 }) 
