@@ -1,5 +1,5 @@
 # Thorium: a reaction-logging bot for discord
-=============================================
+
 ## To use the bot once it's running:
 Type 'thorium help' into a channel it can see.
 React to a message with one of its designated reactions, and hope other people will.
