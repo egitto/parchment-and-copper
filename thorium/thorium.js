@@ -62,9 +62,10 @@ client.on('message', msg => {
   var obey_this = !!(msg.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
   console.log(obey_this + ' ' + msg.member.user.username + '/' + msg.member.nickname + '\n  ' + msg.content)
   if (obey_this &&(msg.content.match(/^[Tt]horium [^{}()\\]*$/))){
-    reply(msg,parse_command_phrase(msg.content.replace(/^[Tt]horium /,'')))
+    parse_command_phrase(msg)
     save_parameters()
   }
+  parse_unprivileged_command(msg)
 }) 
 
 function parse_command_phrase_curried(phrase){
@@ -90,51 +91,121 @@ function parse_command_phrase_curried(phrase){
     globals.watched_emojii = subtract_set(/^watch .*/)('watched_emojii') || globals.watched_emojii
     globals.obey_roles = subtract_set(/^obey .*/)('obey_roles') || globals.obey_roles
 
-
 }
 
-function parse_command_phrase(phrase){
+function parse_unprivileged_command(message){
+    var phrase = msg.content.replace(/^[Tt]horium /,'')
+    var user = msg.author
+    var guild = msg.channel.guild
+    var x = /^add me to role (.+)$/
+    if (phrase.match(x)) {
+      var y = phrase.replace(x,'$1')
+      globals.managed_roles.map((role) => {if ((role.name === y)&& !user.roles.has(role.id)) {
+        user.addRole(role.id).then(()=>
+          reply(message,"Role "+role.name+" added")
+        )}})
+    }
+    var x = /^remove me from role (.+)$/
+    if (phrase.match(x)) {
+      var y = phrase.replace(x,'$1')
+      globals.managed_roles.map((role) => {if ((role.name === y)&& user.roles.has(role.id)) {
+        user.removeRole(role).then(()=>
+          reply(message,"Role "+role.name+" removed")
+        )}})
+    }
+    var x = /^role(s) help$/
+    if (phrase.match(x)) {
+      message.reply("I can add or remove members of these roles: " 
+      +array_to_string(globals.managed_roles.map(r=>{return r.name}))
+      +"\nRequests:\n  add me to role $role\n  remove me from role $role"
+      +"\nCommands:\n  manage $role\n  unmanage $role")
+    }
+}
+
+function parse_command_phrase(message){
     // what follows is disgusting, avert your eyes.
+    var phrase = msg.content.replace(/^[Tt]horium /,'')
+    var response = null
     var x = /^threshold (\d+)$/
     if (phrase.match(x)) {
       globals.threshold = phrase.replace(x,'$1')
-      return 'New threshold: ' + globals.threshold
+      response = 'New threshold: ' + globals.threshold
     }
     var x = /^watch (.+)$/
     if (phrase.match(x)) {
       globals.watched_emojii.add(phrase.replace(x,'$1'))
-      return 'New watched emoji: ' + set_to_pretty_string(globals.watched_emojii)
+      response = 'New watched emoji: ' + set_to_pretty_string(globals.watched_emojii)
     }
     var x = /^unwatch (.+)$/
     if (phrase.match(x)) {
       globals.watched_emojii.delete(phrase.replace(x,'$1'))
-      return 'New watched emoji: ' + set_to_pretty_string(globals.watched_emojii)
+      response = 'New watched emoji: ' + set_to_pretty_string(globals.watched_emojii)
     }
     var x = /^obey (.+)$/
     if (phrase.match(x)) {
       globals.obey_roles.add(phrase.replace(x,'$1'))
-      return 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
+      response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
     }
     var x = /^disobey (.+)$/
     if (phrase.match(x)) {
       globals.obey_roles.delete(phrase.replace(x,'$1'))
       globals.obey_forever_roles.map(owner => {globals.obey_roles.add(owner)})
-      return 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
+      response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
+    }    
+    var x = /^manage (.+)$/
+    if (phrase.match(x)) {
+      y = phrase.replace(x,$1)
+      manage_role(y,message)
+    }    
+    var x = /^unmanage (.+)$/
+    if (phrase.match(x)) {
+      globals.obey_roles.delete(phrase.replace(x,'$1'))
+      globals.obey_forever_roles.map(owner => {globals.obey_roles.add(owner)})
+      response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
     }
     var x = /^change log channel (.+)$/
     if (phrase.match(x)) {
       globals.log_channel_name = phrase.replace(x,'$1')
-      return 'New channel: ' + globals.log_channel_name
+      response = 'New channel: ' + globals.log_channel_name
     }
     if (phrase === 'dump parameters') {
-      return '```'+JSON_pretty(globals)+'```'
+      response = '```'+JSON_pretty(globals)+'```'
     }
     if (phrase === 'shut down without confirmation') {
+      reply(message,'shutting down.')
       throw 'shut down by command'
     }
     if (phrase.match(/^help/)) {
-      return 'I can be controlled with these words: \nthreshold $number\nwatch $emoji\nunwatch $emoji\nobey $role\ndisobey $role\nchange log channel $channel\nhelp\ndump parameters\nshut down without confirmation'
+      response = 'I can be controlled with these words: \nthreshold $number\nwatch $emoji\nunwatch $emoji\nobey $role\ndisobey $role\nchange log channel $channel\nhelp\nroles help\ndump parameters\nshut down without confirmation'
     }
+    if (response) {reply(message,response)}
+}
+
+function manage_role(y,msg){
+  if (!globals.obey_roles.has(y) && !){
+    var named_roles = msg.channel.guild.roles.findAll('name',y)
+    if (named_roles.length > 0){
+      reply(msg,"Already exist role(s) with that name")
+    }else if (obey_roles.has(y)){
+      reply(msg,"Can't manage an obeyed role")}
+    else if(is_managing_role(y)){
+      reply(msg,"Already managing a role by that name")
+    } else {
+      msg.channel.guild.createRole({name: y}).then(role => {
+        globals.managed_roles.push(role)
+        reply(msg,"New role "+y+" created")
+      })
+    }
+  }
+}
+
+function unmanage_role(y,msg){
+  var g = globals.managed_roles.filter(role=>{return role.name === y})
+  globals.managed_roles = g
+}
+
+function is_managing_role(role_name){
+  return !globals.managed_roles.every(role=>{return role.name !=== y})
 }
 
 function reply(msg,content){
