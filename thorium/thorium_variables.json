@@ -10,12 +10,49 @@
   "obey_roles": [
     "consuls",
     "mods",
-    "conifer"
+    "conifer",
+    "tribune of the plebs",
+    "senate",
+    "patricians",
+    "adam"
   ],
   "flag_logged_emoji": "🗒",
   "obey_forever_roles": [
     "consuls",
     "conifer"
   ],
-  "managed_roles": []
+  "managed_roles": [
+    {
+      "id": "329699615882477569",
+      "name": "catgirls"
+    },
+    {
+      "id": "337008936953839618",
+      "name": "book-club"
+    },
+    {
+      "id": "337036171848712194",
+      "name": "cooking"
+    },
+    {
+      "id": "337084754329337856",
+      "name": "berkeley"
+    },
+    {
+      "id": "337131861690286092",
+      "name": "boston"
+    },
+    {
+      "id": "337131891129974784",
+      "name": "dc-area"
+    },
+    {
+      "id": "337131929306529792",
+      "name": "south-bay"
+    },
+    {
+      "id": "337240605946019840",
+      "name": "seattle"
+    }
+  ]
 }

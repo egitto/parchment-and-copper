@@ -5,7 +5,7 @@ curry = require('curry')
 
 var variable_storage_path = 'thorium_variables.json'
 var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
-client.login(auth_discord_thorium)
+client.login(auth_discord_thorium).catch((err)=>{throw err})
 
 // Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
 
@@ -29,13 +29,12 @@ function set_globals_from_json(json){
 set_globals_from_json('' + fs.readFileSync(variable_storage_path))
 
 function array_to_string(arr){
-  return arr.reduce(function(accumulator,item){return accumulator + item + ', '},'')
+  return arr.reduce(function(accumulator,item){return accumulator + item + ', '},'').replace(/, $/,"")
 }
 
 function set_to_pretty_string(set){
-  return [...set].reduce(function(accumulator,item){return accumulator + item + ', ' },'')
+  return array_to_string([...set])
 }
-
 var JSON_pretty = x => JSON.stringify(x,null,'  ')
 var save_parameters = () => fs.writeFileSync(variable_storage_path,JSON_pretty(globals))
 
@@ -49,6 +48,7 @@ client.on('ready', () => {
 client.on('message', message => {
   if (message.content.match(/^[Tt]horium$/)) {
     reply(message, 'I can serve. \nthreshold: ' + globals.threshold + '\nwatched emoji:  ' + set_to_pretty_string(globals.watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals.obey_roles) + '\nlog channel: ' + globals.log_channel_name)
+    list_managing(message)
     // console.log(message.channel.guild)
   }
   x = /^topicis:? (.*)/
@@ -103,27 +103,34 @@ function parse_unprivileged_command(message){
     var x = /^add me to (.+)$/
     if (phrase.match(x)) {
       var y = phrase.replace(x,'$1')
-      if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y)}
-      globals.managed_roles.map((role) => {if ((role.name === y)&& !user.roles.has(role.id)) {
+      if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y); list_managing(message)}
+      // else if (!user.guild.roles.has(role.id)) {reply(message,"Error: role does not exist on this server")}
+      globals.managed_roles.map((role) => {if ((role.name === y)&& !user.roles.has(role.id) &&user.guild.roles.has(role.id)) {
         user.addRole(role.id).then(()=>
-          reply(message,"Role "+role.name+" added")
+          reply(message,"role "+role.name+" added to you")
         ).catch((err)=>reply(message,""+err))}})
     }
     var x = /^remove me from (.+)$/
     if (phrase.match(x)) {
       var y = phrase.replace(x,'$1')
-      if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y)}      
+      if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y); list_managing(message)}      
       globals.managed_roles.map((role) => {if ((role.name === y)&& user.roles.has(role.id)) {
         user.removeRole(role.id).then(()=>
-          reply(message,"Role "+role.name+" removed")
+          reply(message,"role "+role.name+" removed from you")
         ).catch((err)=>reply(message,""+err))}})
     }
-    var x = /^role(s) help$/
+    var x = /^(roles? help)|(list roles)|(help)$/
     if (phrase.match(x)) {
       message.reply("I can add or remove members of these roles: " 
       +array_to_string(globals.managed_roles.map(r=>{return r.name}))
-      +"\nRequests:\n  add me to $role\n  remove me from $role"
-      +"\nCommands:\n  manage $role\n  unmanage $role\nforce manage role")
+      +"\nRequests:\n  add me to $role, remove me from $role, list $role, list roles"
+      +"\nCommands (mod only):\n  manage $role, unmanage $role, force manage $role")
+    }
+    var x = /^list (.+)$/
+    if (phrase.match(x)) {
+      var y = phrase.replace(x,'$1')
+      var response = role_members_usernames(message,y)
+      if (response) {reply(message,'members of '+y+': '+response)}
     }
 }
 
@@ -151,8 +158,8 @@ function parse_command_phrase(message){
       var y = phrase.replace(x,'$1')
       if (!is_managing_role(y)){
         globals.obey_roles.add(y)
-        response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
-      }else{response = 'Unable to assign control role: currently managing role '+y}
+        reply(message,'New control roles: ' + set_to_pretty_string(globals.obey_roles))
+      }else{reply(message,'Unable to assign control role: currently managing role '+y)}
     }
     var x = /^disobey (.+)$/
     if (phrase.match(x)) {
@@ -184,7 +191,6 @@ function parse_command_phrase(message){
       response = '```'+JSON_pretty(globals)+'```'
     }
     if (phrase === 'shut down without confirmation') {
-      reply(message,'shutting down.')
       throw 'shut down by command'
     }
     if (phrase.match(/^help/)) {
@@ -202,29 +208,41 @@ function manage_role(y,message,force){
     }else if (named_roles.length > 0){
       reply(message,"Already exist role(s) with that name; force?")
       if (force && named_roles.length == 1){
-        globals.managed_roles.push(named_roles[0])
+        var role = named_roles[0]
+        globals.managed_roles.push({id: role.id, name: role.name})
         reply(message,"Forcing management anyway")
       }
     }else{
       message.channel.guild.createRole({name: y, mentionable: true}).then((role) => {
-        globals.managed_roles.push(role)
-        reply(message,"New role "+y+" created")
+        globals.managed_roles.push({id: role.id, name: role.name})
+        reply(message,"New role \""+y+"\" created")
       }).catch((err)=>reply(message,"Error: "+err))
     }
+  list_managing(message)
 }
 
 function unmanage_role(role_name,message){
-  var g = globals.managed_roles.filter(role=>{return role.name !== role_name})
-  globals.managed_roles = g
-  reply(message,"Now managing: "+g)
+  globals.managed_roles = globals.managed_roles.filter(role=>{return role.name !== role_name})
+  list_managing(message)
+}
+
+function list_managing(message){
+  var g = globals.managed_roles.map(role=>{return role.name})
+  reply(message,"currently managing: "+array_to_string(g))
 }
 
 function is_managing_role(role_name){
   return !globals.managed_roles.every(role=>{return role.name !== role_name})
 }
 
+function role_members_usernames(message,role_name){
+  var role = message.channel.guild.roles.find('name',role_name)
+  if (role) {return array_to_string(role.members.array().map(member=>{return member.user.username}))}
+}
+
 function reply(message,content){
-  message.reply(content,{disableEveryone: true}) 
+  return log_channel(message).send(''+message.member+', '+content,{disableEveryone: true})
+  // return message.reply(content,{disableEveryone: true}) 
 }
 
 function log_channel(message){
