@@ -5,7 +5,7 @@
     "📓",
     "📔"
   ],
-  "log_channel_name": "topicis-logs",
+  "log_channel_name": "robot-hell",
   "threshold": "1",
   "obey_roles": [
     "consuls",
@@ -14,7 +14,8 @@
     "tribune of the plebs",
     "senate",
     "patricians",
-    "adam"
+    "adam",
+    "golems"
   ],
   "flag_logged_emoji": "🗒",
   "obey_forever_roles": [
@@ -53,6 +54,62 @@
     {
       "id": "337240605946019840",
       "name": "seattle"
+    },
+    {
+      "id": "337455796667416576",
+      "name": "great-lakes"
+    },
+    {
+      "id": "337457213092134917",
+      "name": "fuck-you-im-an-aardvark"
+    },
+    {
+      "id": "337644899237232660",
+      "name": "duelyst"
+    },
+    {
+      "id": "337655585988280320",
+      "name": "san-diego"
+    },
+    {
+      "id": "337688666048561164",
+      "name": "mtg"
+    },
+    {
+      "id": "337740282076594197",
+      "name": "electronics"
+    },
+    {
+      "id": "337754121434300416",
+      "name": "french"
+    },
+    {
+      "id": "337754151058538506",
+      "name": "russian"
+    },
+    {
+      "id": "337754497726283798",
+      "name": "japanese"
+    },
+    {
+      "id": "337817994279256066",
+      "name": "voice-chat"
+    },
+    {
+      "id": "337925337692504067",
+      "name": "hell"
+    },
+    {
+      "id": "337974680877269002",
+      "name": "math"
+    },
+    {
+      "id": "337979856786685953",
+      "name": "europe"
+    },
+    {
+      "id": "291084554419044353",
+      "name": "degeneracy opt in"
     }
   ]
 }
