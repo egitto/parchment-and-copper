@@ -1,14 +1,12 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 fs = require('fs')
-curry = require('curry')
 
 var variable_storage_path = 'thorium_variables.json'
 var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
 client.login(auth_discord_thorium).catch((err)=>{throw err})
 
 // Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
-
 
 function set_globals_from_json(json){
   set_globals_from_json(json)
@@ -17,9 +15,6 @@ function set_globals_from_json(json){
 function set_globals_from_json(json){
   var x = JSON.parse(json)
   globals = x
-  // globals.log_channel_name = x.log_channel_name
-  // globals.threshold = x.threshold
-  // globals.obey_forever_roles = x.obey_forever_roles
   globals.watched_emojii = new Set(x.watched_emojii)
   globals.obey_roles = new Set(x.obey_roles)
   globals.obey_roles.toJSON = globals.watched_emojii.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
@@ -49,7 +44,6 @@ client.on('message', message => {
   if (message.content.match(/^[Tt]horium$/)) {
     reply(message, 'I can serve. \nthreshold: ' + globals.threshold + '\nwatched emoji:  ' + set_to_pretty_string(globals.watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals.obey_roles) + '\nlog channel: ' + globals.log_channel_name)
     list_managing(message)
-    // console.log(message.channel.guild)
   }
   x = /^topicis:? (.*)/
   if (message.content.match(x)){
@@ -58,7 +52,6 @@ client.on('message', message => {
     new_message.content = message.content.replace(x,'topicis_bot: $1')
     log_message(new_message)
   }
-  // console.log(message.member.roles)
   var obey_this = !!(message.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
   console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
   if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
