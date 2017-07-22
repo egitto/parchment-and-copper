@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "opn": "^5.1.0",
+    "request": "^2.81.0",
     "spotify-web-api-node": "^2.4.0"
   },
   "devDependencies": {},
