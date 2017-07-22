@@ -41,10 +41,6 @@ client.on('ready', () => {
 }) 
 
 client.on('message', message => {
-  if (message.content.match(/^[Tt]horium$/)) {
-    reply(message, 'I can serve. \nthreshold: ' + globals.threshold + '\nwatched emoji:  ' + set_to_pretty_string(globals.watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals.obey_roles) + '\nlog channel: ' + globals.log_channel_name)
-    list_managing(message)
-  }
   x = /^topicis:? (.*)/
   if (message.content.match(x)){
     // we don't want the bot to say 'topicis' because that interferes with users searching for that string
@@ -59,8 +55,10 @@ client.on('message', message => {
     if (obey_this){
       privileged = true
     }
-    parse_command(message,privileged)
-    save_parameters()
+    if (message.channel === log_channel(message)){
+      parse_command(message,privileged)
+      save_parameters()
+    }
   }
 }) 
 
@@ -69,6 +67,10 @@ function parse_command(message,privileged){
   var user = message.member
   var guild = message.channel.guild
   var x
+  if (phrase.match(x = /^$/)) {
+    reply(message, 'I can serve. \nwatched emoji:  ' + set_to_pretty_string(globals.watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals.obey_roles) + '\nlog channel: ' + globals.log_channel_name)
+    list_managing(message)
+  }
   if (phrase.match(x = /^add me to (.+?)$/)) {
     var y = phrase.replace(x,'$1')
     if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y); list_managing(message)}
