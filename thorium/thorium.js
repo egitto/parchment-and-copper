@@ -73,8 +73,12 @@ function parse_command(message,privileged){
     var y = phrase.replace(x,'$1')
     if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y); list_managing(message)}
     globals.managed_roles.map((role) => {if ((role.name === y)&& !user.roles.has(role.id) &&user.guild.roles.has(role.id)) {
-      user.addRole(role.id).then(
-        ()=> message.react("✅")).catch((err)=>reply(message,""+err))}})
+      var forbidden
+      if ((forbidden = forbidden_permissions_of(guild.roles.get(role.id))).length == 0)
+      {user.addRole(role.id).then(
+        ()=> message.react("✅")).catch((err)=>reply(message,""+err))}
+      else {reply(message,"that role has forbidden permission(s): "+array_to_string(forbidden))}
+    }})
   }
   if (phrase.match(x = /^remove me from (.+?)$/)) {
     var y = phrase.replace(x,'$1')
@@ -197,6 +201,12 @@ function reply(message,content){
     report_error_on_servermeta(message,globals.log_channel_name+' not found; run change log channel $channel to fix')
   }
   // return message.reply(content,{disableEveryone: true}) 
+}
+
+function forbidden_permissions_of(role){
+  var role_permissions = role.serialize()
+  console.log(globals.dangerous_permissions.filter(permission=>{return role_permissions[permission]}))
+  return globals.dangerous_permissions.filter(permission=>{return role_permissions[permission]})
 }
 
 function log_channel(message){
