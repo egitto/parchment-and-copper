@@ -15,13 +15,14 @@ var update_creds = new_creds =>{
 	spotify.setCredentials(old)
 	write('~/.auth/spotiman',JSON_pretty(spotify.getCredentials()))
 }
-function get_url(url){request.get({url: url, headers: { 'Authorization': 'Bearer ' + spotify.getCredentials().accessToken }, json: true},x=>{return promise.resolve(x)})}
-var depaginate = (href) => {
-	console.log(href)
-	return get_url(href).then(page=>{
+function get_url(url){
+	request.get({url: url, headers: { 'Authorization': 'Bearer ' + spotify.getCredentials().accessToken }, json: true},x=>{return Promise.resolve(x)})}
+var depaginate = (fxn,opts) => {
+	return fxn(opts).then(page=>{
+		console.log(page.body)
 		page = page.body
-		if (!page.next) {return promise.resolve(page.items)}
-		return depaginate(page.next,fetch).then(x=>promise.resolve(page.items.concat(x)))})
+		if (!page.next) {return Promise.resolve(page.items)}
+		return depaginate(fxn,{limit : opts.limit, offset : opts.offset+opts.limit}).then(x=>Promise.resolve(page.items.concat(x)))})
 }
 var do_spotify_stuff = () => {
 	console.log('doing spotify stuff')
@@ -29,10 +30,8 @@ var do_spotify_stuff = () => {
 		var uri_regex = /^spotify:user:(\d+):\w+:([^:]+)$/
 		var user = pl.uri.replace(uri_regex,'$1')
 		var pl = pl.id
-		spotify.getPlaylistTracks(user,pl, {limit: 5}).then(x=>{
-			depaginate(x.body.href).then(x=>console.log(x))
-			console.log(x.body)
-		})
+		depaginate(opts=>spotify.getPlaylistTracks(user,pl, opts),{limit: 100, offset : 0}).then(x=>console.log(x))
+		
 	}))
 }
 var a = process.argv
