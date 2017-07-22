@@ -205,7 +205,6 @@ function reply(message,content){
 
 function forbidden_permissions_of(role){
   var role_permissions = role.serialize()
-  console.log(globals.dangerous_permissions.filter(permission=>{return role_permissions[permission]}))
   return globals.dangerous_permissions.filter(permission=>{return role_permissions[permission]})
 }
 
