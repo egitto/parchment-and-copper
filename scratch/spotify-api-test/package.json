@@ -1,0 +1,25 @@
+{
+  "name": "spotify-api-test",
+  "version": "0.1.0",
+  "description": "Connects to spotify API, does thing",
+  "main": "main.js",
+  "dependencies": {
+    "opn": "^5.1.0",
+    "spotify-web-api-node": "^2.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/egitto/parchment-and-copper/tree/master/scratch/spotify-api-test.git"
+  },
+  "keywords": [
+    "spotify",
+    "api",
+    "authentication"
+  ],
+  "author": "Arthur Egitto",
+  "license": "ISC"
+}
