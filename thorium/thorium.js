@@ -243,7 +243,7 @@ function log_message(message,emoji_name){
     log_channel(message).send(reply,{disableEveryone: true}) 
     console.log('recorded ' + reply)
   }else{
-    report_error_on_servermeta(message,'log channel ' + globals.log_channel_name + ' not found')
+    report_error_on_servermeta(message,'channel \'' + globals.log_channel_name + '\' not found. use `change log channel $channelname` to fix.')
   }
 }
 
