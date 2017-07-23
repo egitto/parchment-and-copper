@@ -1,0 +1,27 @@
+{
+  "name": "irc-bot",
+  "version": "0.1.0",
+  "description": "a proof-of-concept irc bot, to later turn into a discord bridge bot",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/egitto/parchment-and-copper.git"
+  },
+  "keywords": [
+    "irc",
+    "bot",
+    "api"
+  ],
+  "author": "arthur.d.egitto@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/egitto/parchment-and-copper/issues"
+  },
+  "homepage": "https://github.com/egitto/parchment-and-copper#readme",
+  "dependencies": {
+    "irc": "^0.5.2"
+  }
+}
