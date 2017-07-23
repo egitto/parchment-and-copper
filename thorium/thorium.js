@@ -134,9 +134,9 @@ function parse_command(message,privileged){
     globals.log_channel_name = phrase.replace(x,'$1')
     response = 'New channel: ' + globals.log_channel_name
   }
-  if (phrase.match(x = /^change color (.*)$/)) {
-    change_managed_role_colors(guild,phrase.replace(x,'$1'))
-    response = 'all managed role colors changed'
+  if (phrase.match(x = /^change color ([^ ]+) ([^ ]+)$/)) {
+    change_role_colors(guild,phrase.replace(x,'$1'),phrase.replace(x,'$2'))
+    response = 'role color changed'
   }
   if (phrase === 'dump parameters') {
     response = '```'+JSON_pretty(globals)+'```'
@@ -151,11 +151,16 @@ function parse_command(message,privileged){
   console.log('Command finished')
 }
 
-function change_managed_role_colors(guild,color){
+function change_role_colors(guild,role_name,color){
+  console.log('changing',role_name,color)
   globals.managed_roles.map(role=>{
     role = guild.roles.get(role.id)
-    role && role.setColor(color).catch(err=>console.log(err))
+    if (role.name && (role.name === role_name)){
+      role.setColor(color).catch(err=>console.log(err))
+      console.log('color actually changed')
+    }
   })
+  console.log('color changes finished')
 }
 
 function manage_role(y,message,force){
