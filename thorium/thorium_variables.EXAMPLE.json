@@ -15,7 +15,7 @@
   ],
   "flag_logged_emoji": "🗒",
   "obey_forever_roles": [
-    "consuls",
+    "consuls"
   ],
   "managed_roles": [
     {
@@ -73,7 +73,7 @@
     {
       "id": "337979856786685953",
       "name": "europe"
-    },
+    }
   ],
   "dangerous_permissions": [
     "CREATE_INSTANT_INVITE",

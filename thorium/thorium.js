@@ -4,7 +4,7 @@ fs = require('fs')
 
 var variable_storage_path = 'thorium_variables.json'
 var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
-client.login(auth_discord_thorium).catch((err)=>{throw err})
+client.login(auth_discord_thorium).catch((err)=>{console.log('login_error'); throw err})
 
 // Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
 
@@ -14,7 +14,7 @@ function set_globals_from_json(json){
   globals.watched_emojii = new Set(x.watched_emojii)
   globals.obey_roles = new Set(x.obey_roles)
   globals.obey_roles.toJSON = globals.watched_emojii.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
-  console.log(json)
+  // console.log(json)
 }
 
 set_globals_from_json('' + fs.readFileSync(variable_storage_path))
@@ -29,12 +29,12 @@ function set_to_pretty_string(set){
 var JSON_pretty = x => JSON.stringify(x,null,'  ')
 var save_parameters = () => fs.writeFileSync(variable_storage_path,JSON_pretty(globals))
 
-console.log(JSON.stringify(globals))
+// console.log(JSON.stringify(globals))
 console.log('loading...')
 
 client.on('ready', () => {
   console.log('I am ready!')
-}) 
+})
 
 client.on('message', message => {
   x = /^topicis:? (.*)/
@@ -47,12 +47,8 @@ client.on('message', message => {
   var obey_this = !!(message.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
   console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
   if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
-    var privileged = false
-    if (obey_this){
-      privileged = true
-    }
     if (message.channel === log_channel(message)){
-      parse_command(message,privileged)
+      parse_command(message,obey_this)
       save_parameters()
     }
   }
@@ -138,6 +134,10 @@ function parse_command(message,privileged){
     globals.log_channel_name = phrase.replace(x,'$1')
     response = 'New channel: ' + globals.log_channel_name
   }
+  if (phrase.match(x = /^change color (.*)$/)) {
+    change_managed_role_colors(guild,phrase.replace(x,'$1'))
+    response = 'all managed role colors changed'
+  }
   if (phrase === 'dump parameters') {
     response = '```'+JSON_pretty(globals)+'```'
   }
@@ -149,6 +149,13 @@ function parse_command(message,privileged){
   }
   if (response) {reply(message,response)}
   console.log('Command finished')
+}
+
+function change_managed_role_colors(guild,color){
+  globals.managed_roles.map(role=>{
+    role = guild.roles.get(role.id)
+    role && role.setColor(color).catch(err=>console.log(err))
+  })
 }
 
 function manage_role(y,message,force){
