@@ -9,10 +9,6 @@ client.login(auth_discord_thorium).catch((err)=>{throw err})
 // Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
 
 function set_globals_from_json(json){
-  set_globals_from_json(json)
-}
-
-function set_globals_from_json(json){
   var x = JSON.parse(json)
   globals = x
   globals.watched_emojii = new Set(x.watched_emojii)
