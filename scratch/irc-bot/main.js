@@ -14,8 +14,7 @@ dclient.login(discord_auth).catch((err)=>{console.log('discord login error'); th
 console.log('reading connection config')
 connections_path = 'irc_discord_connections'
 connections = JSON.parse(fs.fileReadSync(connections_path))
-// just to demo what it should look like; delete this line later
-connections = [{irc_server: 'something.net', irc_channel: '#rational', discord_guild: '234827', discord_channel: '273872'}]
+// {irc_server: 'something.net', irc_channel: '#rational', discord_guild: '234827', discord_channel: '273872'}
 var JSON_pretty = x => JSON.stringify(x,null,'  ')
 var write_connections = () => fs.fileWriteSync(connections_path, JSON_pretty(connections))
 var add_connection = (json_string) => {
@@ -54,13 +53,29 @@ function on_irc_message(channel,from,to,message){
 	on_irc_message_channel && on_irc_message_channel(from,to,message)
 }
 function on_irc_message_lw(from,to,message){
+
 }
 function on_irc_message_rational(from,to,message){
 }
-
-function send_irc_to_discord(channel,from,to,message){
-
-}
-function send_discord_to_irc(message){
+function check_blocked_from_discord_server(from){
 	
+}
+function send_irc_to_discords(channel,from,to,message){
+	var targets = connections.filter(x=>x.irc_channel === channel)
+	targets.map(x=>{
+		var g = dclient.guilds.get(x.discord_guild)
+		if (g){
+			var c = g.channels.get(x.discord_channel)
+			// TODO: implement a system to check if user has been blocked from this channel/guild
+			if (c){
+				c.send('\n'+channel+': '+from+': '+message,{disableEveryone: true})
+			}
+		}
+	})
+}
+function send_discord_to_ircs(message){
+	var targets = connections.filter(x=>(x.discord_guild === message.channel.guild.id && x.discord_channel === message.channel.id))
+	targets.map(x=>{
+		var 
+	}
 }
