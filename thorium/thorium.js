@@ -37,7 +37,7 @@ client.on('ready', () => {
 })
 
 client.on('message', message => {
-  x = /^topicis:? (.*)/
+  x = /^[Tt]opicis:? (.*)/
   if (message.content.match(x)){
     // we don't want the bot to say 'topicis' because that interferes with users searching for that string
     var new_message = Object.create(message)
@@ -63,8 +63,8 @@ function parse_command(message,privileged){
     reply(message, 'I can serve. \nwatched emoji:  ' + set_to_pretty_string(globals.watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals.obey_roles) + '\nlog channel: ' + globals.log_channel_name)
     list_managing(message)
   }
-  if (phrase.match(x = /^add me to (.+?)$/)) {
-    var y = phrase.replace(x,'$1')
+  if (phrase.match(x = /^(add|send|fly|drag) me to (.+?)$/)) {
+    var y = phrase.replace(x,'$2')
     if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y); list_managing(message)}
     globals.managed_roles.map((role) => {if ((role.name === y)&& !user.roles.has(role.id) &&user.guild.roles.has(role.id)) {
       var forbidden
@@ -74,8 +74,8 @@ function parse_command(message,privileged){
       else {reply(message,"that role has forbidden permission(s): "+array_to_string(forbidden))}
     }})
   }
-  if (phrase.match(x = /^remove me from (.+?)$/)) {
-    var y = phrase.replace(x,'$1')
+  if (phrase.match(x = /^(remove|evacuate|kidnap|rescue) me from (.+?)$/)) {
+    var y = phrase.replace(x,'$2')
     if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y); list_managing(message)}      
     globals.managed_roles.map((role) => {if ((role.name === y)&& user.roles.has(role.id)) {
       user.removeRole(role.id).then(
