@@ -74,7 +74,7 @@ function parse_command(message,privileged){
       else {reply(message,"that role has forbidden permission(s): "+array_to_string(forbidden))}
     }})
   }
-  if (phrase.match(x = /^(remove|evacuate|kidnap|rescue) me from (.+?)$/)) {
+  if (phrase.match(x = /^(remove|evacuate|kidnap|rescue|save) me from (.+?)$/)) {
     var y = phrase.replace(x,'$2')
     if (!is_managing_role(y)) {reply(message,"I'm not managing the role "+y); list_managing(message)}      
     globals.managed_roles.map((role) => {if ((role.name === y)&& user.roles.has(role.id)) {
@@ -91,6 +91,10 @@ function parse_command(message,privileged){
     var y = phrase.replace(x,'$1')
     var response = role_members_usernames(message,y)
     if (response) {reply(message,'members of '+y+': '+response)}
+  }
+  if (phrase.match(x = /^change color ([^ ]+) ([^ ]+)$/)) {
+    var success = change_role_colors(privileged,message,phrase.replace(x,'$1'),phrase.replace(x,'$2'))
+    reply(message,'role color changed: '+success)
   }
   if (!privileged) {return}
   var response = null
@@ -134,10 +138,6 @@ function parse_command(message,privileged){
     globals.log_channel_name = phrase.replace(x,'$1')
     response = 'New channel: ' + globals.log_channel_name
   }
-  if (phrase.match(x = /^change color ([^ ]+) ([^ ]+)$/)) {
-    change_role_colors(guild,phrase.replace(x,'$1'),phrase.replace(x,'$2'))
-    response = 'role color changed'
-  }
   if (phrase === 'dump parameters') {
     response = '```'+JSON_pretty(globals)+'```'
   }
@@ -151,16 +151,18 @@ function parse_command(message,privileged){
   console.log('Command finished')
 }
 
-function change_role_colors(guild,role_name,color){
+function change_role_colors(privileged,message,role_name,color){
   console.log('changing',role_name,color)
-  globals.managed_roles.map(role=>{
-    role = guild.roles.get(role.id)
-    if (role.name && (role.name === role_name)){
-      role.setColor(color).catch(err=>console.log(err))
-      console.log('color actually changed')
-    }
-  })
-  console.log('color changes finished')
+  var role = message.channel.guild.roles.find('name',role_name)
+  var only_member = (role.members.array().length === 1 && role.members.array()[0].user.id === message.author.id)
+  console.log(role.members.array())
+  console.log([message.member])
+  if (privileged || only_member){
+    role.setColor(color).catch(err=>console.log(err))
+    console.log('color actually changed')
+    return true
+  }
+  return false
 }
 
 function manage_role(y,message,force){
