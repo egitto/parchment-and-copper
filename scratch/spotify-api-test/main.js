@@ -15,25 +15,6 @@ var update_creds = new_creds =>{
 	spotify.setCredentials(old)
 	write('~/.auth/spotiman',JSON_pretty(spotify.getCredentials()))
 }
-var depaginate = (fxn,opts) => {
-	return fxn(opts).then(page=>{
-		console.log(page.body)
-		page = page.body
-		if (!page.next) {return Promise.resolve(page.items)}
-		return depaginate(fxn,{limit : opts.limit, offset : opts.offset+opts.limit}).then(x=>Promise.resolve(page.items.concat(x)))})
-}
-var do_spotify_stuff = () => {
-	console.log('doing spotify stuff')
-	spotify.getUserPlaylists().then(x=>x.body.items.slice(0,1).map(pl=>{
-		var uri_regex = /^spotify:user:(\d+):\w+:([^:]+)$/
-		var user = pl.uri.replace(uri_regex,'$1')
-		var pl = pl.id
-		depaginate(opts=>spotify.getPlaylistTracks(user,pl, opts),{limit: 100, offset : 0}).then(x=>{
-			
-			console.log(x)
-		})
-	}))
-}
 var a = process.argv
 set_creds()
 if (a[2] === 'auth'){
@@ -50,4 +31,46 @@ if (a[2] === 'auth'){
 		update_creds(x)
 		do_spotify_stuff()
 	})
+}
+
+
+var depaginate = (fxn,opts) => {
+	return fxn(opts).then(page=>{
+		// console.log(page.body)
+		page = page.body
+		if (!page.next) {return Promise.resolve(page.items)}
+		return depaginate(fxn,{limit : opts.limit, offset : opts.offset+opts.limit}).then(x=>{return Promise.resolve(page.items.concat(x))}).catch(e=>{throw e})}).catch(err=>{throw err})
+}
+var sort_by = (array,property) => {
+	return array.sort((a,b)=>{if(a[property]>b[property]){return 1}else{return -1}})
+}
+var group_by = (object_array, property) => {
+	var grouped = []
+	var dup = sort_by(object_array.map(x=>x),property)
+	dup.map((item)=>{
+		var prev = grouped[grouped.length-1]
+		if (prev && (prev[0][property] === item[property])){prev.push(item)}else{grouped.push([item])}
+	})
+	return grouped
+}
+var do_spotify_stuff = () => {
+	console.log('doing spotify stuff')
+	spotify.getUserPlaylists().then(x=>x.body.items.map(pl=>{
+		var uri_regex = /^spotify:user:(\d+):\w+:([^:]+)$/
+		var user = pl.uri.replace(uri_regex,'$1')
+		var getTracks=()=>depaginate(opts=>{return spotify.getPlaylistTracks(user,pl.id, opts)},{limit: 100, offset: 0})
+		getTracks().then(x=>{
+			var y = x.map((item,i)=>{return {id: item.track.id, uri: item.track.uri, date: item.added_at, name: item.track.name, index: i}})
+			y = group_by(y,'uri').filter(group=>{return group.length > 1})
+			y = y.map(group=>sort_by(group,'date').slice(1))
+			var index_list = []
+			y.map(group=>group.map(track=>index_list.push(track.index)))
+			// console.log(x.filter(x=>x.track.id===null))
+			console.log(pl)
+			console.log("VVVVVVV=======DUPLICATES TO PURGE=======VVVVVVVV")
+			console.log("From playlist: "+pl.name)
+			console.log(y)
+			// spotify.removeTracksFromPlaylistByPosition(user,pl.id,index_list,pl.snapshot_id).then(console.log('purged successfully')).catch(err=>console.log('failure: '+err))
+		}).catch(e=>{throw e})
+	}))
 }
