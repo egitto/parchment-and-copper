@@ -81,10 +81,24 @@ function parse_command(message,privileged){
       user.removeRole(role.id).then(
         ()=> message.react("✅")).catch((err)=>reply(message,""+err))}})
   }
-  if (phrase.match(x = /^(roles? help)|(list roles)|(help)$/)) {
+  if (phrase.match(x = /^help$/)) {
+    message.reply("Help on what topic? roles, mod commands, mod roles, logging")
+  }
+  if (phrase.match(x = /^(help )?mod roles$/)) {
+    message.reply("I consider the following roles mods to obey: "+set_to_pretty_string(globals.obey_roles))
+  }
+  if (phrase.match(x = /^(help )?logging$/)) {
+    message.reply("When at least "+globals.threshold+" of any one of "+set_to_pretty_string(globals.watched_emojii)
+      +" reactions are added to a message, or when a message is prefaced by 'topicis', I will "
+      +" log the message in #"+globals.log_channel_name+".")
+  }
+  if (phrase.match(x = /^(help )?mod commands$/)) {
+    message.reply('Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color')
+  }
+  if (phrase.match(x = /^(help |list )?roles$/)) {
     message.reply("I can add or remove members of these roles: " 
     +array_to_string(globals.managed_roles.map(r=>{return r.name}))
-    +"\nRequests:\n  add me to $role, remove me from $role, list $role, list roles"
+    +"\nRequests:\n  add me to $role, remove me from $role, list $role, list roles, change color $personal_role $color"
     +"\nCommands (mod only):\n  manage $role, unmanage $role, force manage $role")
   }
   if (phrase.match(x = /^list (.+)$/)) {
@@ -143,9 +157,6 @@ function parse_command(message,privileged){
   }
   if (phrase === 'shut down without confirmation') {
     throw 'shut down by command'
-  }
-  if (phrase.match(/^help/)) {
-    response = 'I can be controlled with these words: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, help, roles help, dump parameters, shut down without confirmation'
   }
   if (response) {reply(message,response)}
   console.log('Command finished')
