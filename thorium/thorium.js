@@ -45,7 +45,7 @@ client.on('message', message => {
     log_message(new_message)
   }
   var obey_this = !!(message.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
-  console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
+  // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
   if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
     if (message.channel === log_channel(message)){
       parse_command(message,obey_this)
@@ -56,6 +56,7 @@ client.on('message', message => {
 
 function parse_command(message,privileged){
   var phrase = message.content.replace(/^[Tt]horium,?( please)? (.+?)(,? please.?)?$/,'$2').toLowerCase()
+  console.log(phrase)
   var user = message.member
   var guild = message.channel.guild
   var x
