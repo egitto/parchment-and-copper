@@ -83,21 +83,21 @@ function parse_command(message,privileged){
         ()=> message.react("✅")).catch((err)=>reply(message,""+err))}})
   }
   if (phrase.match(x = /^help$/)) {
-    message.reply("Help on what topic? roles, mod commands, mod roles, logging")
+    reply(message,"Help on what topic? roles, mod commands, mod roles, logging")
   }
   if (phrase.match(x = /^(help )?mod roles$/)) {
-    message.reply("I consider the following roles mods to obey: "+set_to_pretty_string(globals.obey_roles))
+    reply(message,"I consider the following roles mods to obey: "+set_to_pretty_string(globals.obey_roles))
   }
   if (phrase.match(x = /^(help )?logging$/)) {
-    message.reply("When at least "+globals.threshold+" of any one of "+set_to_pretty_string(globals.watched_emojii)
+    reply(message,"When at least "+globals.threshold+" of any one of "+set_to_pretty_string(globals.watched_emojii)
       +" reactions are added to a message, or when a message is prefaced by 'topicis', I will "
       +" log the message in #"+globals.log_channel_name+".")
   }
   if (phrase.match(x = /^(help )?mod commands$/)) {
-    message.reply('Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role -> $newname')
+    reply(message,'Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role -> $newname')
   }
   if (phrase.match(x = /^(help |list )?roles$/)) {
-    message.reply("I can add or remove members of these roles: " 
+    reply(message,"I can add or remove members of these roles: " 
     +array_to_string(globals.managed_roles.map(r=>{return r.name}).sort())
     +"\nRequests:\n  add me to $role, remove me from $role, list $role, list roles, change color $personal_role $color"
     +"\nCommands (mod only):\n  manage $role, unmanage $role, force manage $role")
@@ -145,7 +145,7 @@ function parse_command(message,privileged){
     var y = phrase.replace(x,'$1')
     manage_role(y,message,false)
   }    
-  if (phrase.match(x = /^rename (.+?) ?-> ?(.+?)$/)) {
+  if (phrase.match(x = /^rename (.+?) ?-> ?(.+)$/)) {
     var y = phrase.replace(x,'$1')
     var z = phrase.replace(x,'$2')
     rename_role(y,z,message)
@@ -171,9 +171,8 @@ function parse_command(message,privileged){
 function change_role_colors(privileged,message,role_name,color){
   console.log('changing',role_name,color)
   var role = message.channel.guild.roles.find('name',role_name)
+  if (!role[0]) return false
   var only_member = (role.members.array().length === 1 && role.members.array()[0].user.id === message.author.id)
-  console.log(role.members.array())
-  console.log([message.member])
   if (privileged || only_member){
     role.setColor(color).catch(err=>console.log(err))
     console.log('color actually changed')
@@ -181,22 +180,23 @@ function change_role_colors(privileged,message,role_name,color){
   } return false
 }
 
-function rename_role(start,end,message){
-  var start_roles = message.channel.guild.roles.findAll('name',start)
-  var end_roles = message.channel.guild.roles.findAll('name',end)
-  if(!is_managing_role(start)){
-    reply(message,"Not managing that role")
-  }else if (globals.obey_roles.has(end)){
+function rename_role(initial,final,message){
+  console.log("renaming "+initial+" to "+final)
+  var initial_roles = message.channel.guild.roles.findAll('name',initial)
+  var final_roles = message.channel.guild.roles.findAll('name',final)
+  if(!is_managing_role(initial)){
+    reply(message,"Not managing role "+initial)
+  }else if (globals.obey_roles.has(final)){
     reply(message,"Can't rename to an obeyed role")
-  }else if (start_roles.length !== 1){
-    reply(message,"Is not exactly one role called "+start)
-  }else if (end_roles.length !== 0){
-    reply(message,"Already exist role(s) called "+end)
+  }else if (initial_roles.length !== 1){
+    reply(message,"Is not exactly one role called "+initial)
+  }else if (final_roles.length !== 0){
+    reply(message,"Already exist role(s) called "+final)
   }else{
-    start_roles[0].setName(end).then((role) => {
+    initial_roles[0].setName(final).then((role) => {
       globals.managed_roles.push({id: role.id, name: role.name})
       reply(message,"Role renamed.")
-      unmanage_role(start, message)
+      unmanage_role(initial, message)
     }).catch((err)=>reply(message,"Error: "+err))
   }
 }
@@ -247,7 +247,7 @@ function reply(message,content){
   }else{ 
     report_error_on_servermeta(message,globals.log_channel_name+' not found; run change log channel $channel to fix')
   }
-  // return message.reply(content,{disableEveryone: true}) 
+  // return reply(message,content,{disableEveryone: true}) 
 }
 
 function forbidden_permissions_of(role){
