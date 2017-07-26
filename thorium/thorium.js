@@ -37,7 +37,7 @@ client.on('ready', () => {
 })
 
 client.on('message', message => {
-  x = /^[Tt]opicis:? (.*)/
+  var x = /^[Tt]opicis:? (.*)/
   if (message.content.match(x)){
     // we don't want the bot to say 'topicis' because that interferes with users searching for that string
     var new_message = Object.create(message)
@@ -280,7 +280,7 @@ function isnt_logged_yet(message){
 function log_message(message,emoji_name){
     // message = messageReaction.message
   console.log(emoji_name)
-  emoji_name = emoji_name || globals.flag_logged_emoji
+  var emoji_name = emoji_name || globals.flag_logged_emoji
   var reply = emoji_name + ' at `' + message.createdAt + '` in ' + message.channel +', ' +message.author + ' said:\n\n' + message
   // console.log(message)
   if (log_channel(message)){
