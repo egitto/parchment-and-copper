@@ -94,11 +94,11 @@ function parse_command(message,privileged){
       +" log the message in #"+globals.log_channel_name+".")
   }
   if (phrase.match(x = /^(help )?mod commands$/)) {
-    message.reply('Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role $newname')
+    message.reply('Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role -> $newname')
   }
   if (phrase.match(x = /^(help |list )?roles$/)) {
     message.reply("I can add or remove members of these roles: " 
-    +array_to_string(globals.managed_roles.map(r=>{return r.name}))
+    +array_to_string(globals.managed_roles.map(r=>{return r.name}).sort())
     +"\nRequests:\n  add me to $role, remove me from $role, list $role, list roles, change color $personal_role $color"
     +"\nCommands (mod only):\n  manage $role, unmanage $role, force manage $role")
   }
@@ -145,7 +145,7 @@ function parse_command(message,privileged){
     var y = phrase.replace(x,'$1')
     manage_role(y,message,false)
   }    
-  if (phrase.match(x = /^rename (\w*)\s(\w*)$/)) {
+  if (phrase.match(x = /^rename (.+?) ?-> ?(.+?)$/)) {
     var y = phrase.replace(x,'$1')
     var z = phrase.replace(x,'$2')
     rename_role(y,z,message)
@@ -228,7 +228,7 @@ function unmanage_role(role_name,message){
 }
 
 function list_managing(message){
-  var g = globals.managed_roles.map(role=>{return role.name})
+  var g = globals.managed_roles.map(role=>{return role.name}).sort()
   reply(message,"currently managing: "+array_to_string(g))
 }
 
