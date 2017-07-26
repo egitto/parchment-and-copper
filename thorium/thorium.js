@@ -48,14 +48,14 @@ client.on('message', message => {
   // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
   if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
     if (message.channel === log_channel(message)){
-      parse_command(message,obey_this)
+      message.content.split("\n").map(text_to_parse=>parse_command(message,text_to_parse,obey_this))
       save_parameters()
     }
   }
 }) 
 
-function parse_command(message,privileged){
-  var phrase = message.content.replace(/^[Tt]horium,?( please)? (.+?)(,? please.?)?$/,'$2').toLowerCase()
+function parse_command(message,text_to_parse,privileged){
+  var phrase = text_to_parse.replace(/^[Tt]horium,?( please)? (.+?)(,? please.?)?$/,'$2').toLowerCase()
   console.log(phrase)
   var user = message.member
   var guild = message.channel.guild
