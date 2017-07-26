@@ -94,7 +94,7 @@ function parse_command(message,privileged){
       +" log the message in #"+globals.log_channel_name+".")
   }
   if (phrase.match(x = /^(help )?mod commands$/)) {
-    message.reply('Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color')
+    message.reply('Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role $newname')
   }
   if (phrase.match(x = /^(help |list )?roles$/)) {
     message.reply("I can add or remove members of these roles: " 
@@ -138,15 +138,20 @@ function parse_command(message,privileged){
     response = 'New control roles: ' + set_to_pretty_string(globals.obey_roles)
   }
   if (phrase.match(x = /^force manage (.+)$/)) {
-    y = phrase.replace(x,'$1')
+    var y = phrase.replace(x,'$1')
     manage_role(y,message,true)
   }        
   if (phrase.match(x = /^manage (.+)$/)) {
-    y = phrase.replace(x,'$1')
+    var y = phrase.replace(x,'$1')
     manage_role(y,message,false)
   }    
+  if (phrase.match(x = /^rename (\w*)\s(\w*)$/)) {
+    var y = phrase.replace(x,'$1')
+    var z = phrase.replace(x,'$2')
+    rename_role(y,z,message)
+  } 
   if (phrase.match(x = /^unmanage (.+)$/)) {
-    y = phrase.replace(x,'$1')
+    var y = phrase.replace(x,'$1')
     unmanage_role(y,message) 
   }
   if (phrase.match(x = /^change log channel (.+)$/)) {
@@ -173,30 +178,48 @@ function change_role_colors(privileged,message,role_name,color){
     role.setColor(color).catch(err=>console.log(err))
     console.log('color actually changed')
     return true
+  } return false
+}
+
+function rename_role(start,end,message){
+  var start_roles = message.channel.guild.roles.findAll('name',start)
+  var end_roles = message.channel.guild.roles.findAll('name',end)
+  if(!is_managing_role(start)){
+    reply(message,"Not managing that role")
+  }else if (globals.obey_roles.has(end)){
+    reply(message,"Can't rename to an obeyed role")
+  }else if (start_roles.length !== 1){
+    reply(message,"Is not exactly one role called "+start)
+  }else if (end_roles.length !== 0){
+    reply(message,"Already exist role(s) called "+end)
+  }else{
+    start_roles[0].setName(end).then((role) => {
+      globals.managed_roles.push({id: role.id, name: role.name})
+      reply(message,"Role renamed.")
+      unmanage_role(start, message)
+    }).catch((err)=>reply(message,"Error: "+err))
   }
-  return false
 }
 
 function manage_role(y,message,force){
   var named_roles = message.channel.guild.roles.findAll('name',y)
-    if (globals.obey_roles.has(y)){
-      reply(message,"Can't manage an obeyed role")
-    }else if(is_managing_role(y)){
-      reply(message,"Already managing a role by that name")
-    }else if (named_roles.length > 0){
-      reply(message,"Already exist role(s) with that name; force?")
-      if (force && named_roles.length == 1){
-        var role = named_roles[0]
-        globals.managed_roles.push({id: role.id, name: role.name})
-        reply(message,"Forcing management anyway")
-      }
-    }else{
-      message.channel.guild.createRole({name: y, mentionable: true}).then((role) => {
-        globals.managed_roles.push({id: role.id, name: role.name})
-        reply(message,"New role \""+y+"\" created")
-      }).catch((err)=>reply(message,"Error: "+err))
+  if (globals.obey_roles.has(y)){
+    reply(message,"Can't manage an obeyed role")
+  }else if(is_managing_role(y)){
+    reply(message,"Already managing a role by that name")
+  }else if (named_roles.length > 0){
+    reply(message,"Already exist role(s) with that name; force?")
+    if (force && named_roles.length == 1){
+      var role = named_roles[0]
+      globals.managed_roles.push({id: role.id, name: role.name})
+      reply(message,"Forcing management anyway")
     }
-  list_managing(message)
+  }else{
+    message.channel.guild.createRole({name: y, mentionable: true}).then((role) => {
+      globals.managed_roles.push({id: role.id, name: role.name})
+      reply(message,"New role \""+y+"\" created")
+    }).catch((err)=>reply(message,"Error: "+err))
+  }list_managing(message)
 }
 
 function unmanage_role(role_name,message){
