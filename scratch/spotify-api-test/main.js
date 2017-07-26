@@ -66,7 +66,7 @@ var do_spotify_stuff = () => {
 			var index_list = []
 			y.map(group=>group.map(track=>index_list.push(track.index)))
 			// console.log(x.filter(x=>x.track.id===null))
-			console.log(pl)
+			// console.log(pl)
 			console.log("VVVVVVV=======DUPLICATES TO PURGE=======VVVVVVVV")
 			console.log("From playlist: "+pl.name)
 			console.log(y)
