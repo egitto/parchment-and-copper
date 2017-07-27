@@ -44,12 +44,14 @@ client.on('message', message => {
     new_message.content = message.content.replace(x,'topicis_bot: $1')
     log_message(new_message)
   }
-  var obey_this = !!(message.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
-  // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
-  if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
-    if (message.channel === log_channel(message)){
-      message.content.split("\n").map(text_to_parse=>parse_command(message,text_to_parse,obey_this))
-      save_parameters()
+  if (message.member){ // if the message is a pm, this will be null, and crash
+    var obey_this = !!(message.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
+    // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
+    if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
+      if (message.channel === log_channel(message)){
+        message.content.split("\n").map(text_to_parse=>parse_command(message,text_to_parse,obey_this))
+        save_parameters()
+      }
     }
   }
 }) 
