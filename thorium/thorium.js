@@ -44,7 +44,7 @@ client.on('message', message => {
     new_message.content = message.content.replace(x,'topicis_bot: $1')
     log_message(new_message)
   }
-  if (message.member){ // if the message is a pm, this will be null, and crash
+  if (message.member){ // if the message is a pm, this will be null
     var obey_this = !!(message.member.roles.find(item => {return globals.obey_roles.has(item.name)}, true))
     // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
     if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
@@ -55,6 +55,20 @@ client.on('message', message => {
     }
   }
 }) 
+
+client.on('messageReactionAdd', message_reaction => {
+  respond_to_reaction(message_reaction)
+}) 
+
+function respond_to_reaction(message_reaction){
+  var emoji_name = message_reaction._emoji.name 
+  var reacts = message_reaction.count
+  console.log('reaction spotted: ' + emoji_name + ' in #' + message_reaction.message.channel.name)
+  message = message_reaction.message
+  if(is_watched(emoji_name) && (reacts >= globals.threshold) && isnt_logged_yet(message) && ('' + message)){
+    log_message(message,emoji_name)
+  }
+}
 
 function parse_command(message,text_to_parse,privileged){
   var phrase = text_to_parse.replace(/^[Tt]horium,?( please)? (.+?)(,? please.?)?$/,'$2').toLowerCase()
@@ -295,13 +309,3 @@ function log_message(message,emoji_name){
     report_error_on_servermeta(message,'channel \'' + globals.log_channel_name + '\' not found. use `change log channel $channelname` to fix.')
   }
 }
-
-client.on('messageReactionAdd', messageReaction => {
-  var emoji_name = messageReaction._emoji.name 
-  var reacts = messageReaction.count
-  console.log('reaction spotted: ' + emoji_name + ' in #' + messageReaction.message.channel.name)
-  message = messageReaction.message
-  if(is_watched(emoji_name) && (reacts >= globals.threshold) && isnt_logged_yet(message) && ('' + message)){
-    log_message(message,emoji_name)
-  }
-}) 
