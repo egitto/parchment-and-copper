@@ -98,11 +98,13 @@ function parse_command(message,text_to_parse,privileged){
   if (phrase.match(x = /^(help )?mod commands$/)) {
     reply(message,'Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role -> $newname')
   }
-  if (phrase.match(x = /^(help |list )?roles$/)) {
+  if (phrase.match(x = /^list roles$/)) {
     reply(message,"I can add or remove members of these roles: " 
-    +array_to_string(globals.managed_roles.map(r=>{return r.name}).sort())
-    +"\nRequests:\n  add me to $role, remove me from $role, list $role, list roles, change color $personal_role $color"
-    +"\nCommands (mod only):\n  manage $role, unmanage $role, force manage $role")
+    +array_to_string(globals.managed_roles.map(r=>{return r.name}).sort()))
+  }
+  if (phrase.match(x = /^help roles$/)) {
+    reply(message,"Commands:\n  add me to $role, remove me from $role, list $role, list roles, change color $personal_role $color"
+    +"\nMod commands:\n  manage $role, unmanage $role, force manage $role")
   }
   if (phrase.match(x = /^list (.+)$/)) {
     var y = phrase.replace(x,'$1')
