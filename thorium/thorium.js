@@ -122,7 +122,7 @@ function parse_command(message,text_to_parse,privileged){
   }
   if (phrase.match(x = /^list (.+)$/)) {
     var y = phrase.replace(x,'$1')
-    var response = role_members_usernames(message,y)
+    var response = role_members_names(message,y)
     if (response) {reply(message,'members of '+y+': '+response)}
   }
   if (phrase.match(x = /^change color ([^ ]+) ([^ ]+)$/)) {
@@ -254,9 +254,9 @@ function is_managing_role(role_name){
   return !globals.managed_roles.every(role=>{return role.name !== role_name})
 }
 
-function role_members_usernames(message,role_name){
+function role_members_names(message,role_name){
   var role = message.channel.guild.roles.find('name',role_name)
-  if (role) {return array_to_string(role.members.array().map(member=>{return member.user.username}))}
+  if (role) {return array_to_string(role.members.array().map(member=>{return member.displayName}))}
 }
 
 function reply(message,content){
