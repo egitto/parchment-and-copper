@@ -122,8 +122,12 @@ function parse_command(message,text_to_parse,privileged){
   }
   if (phrase.match(x = /^list (.+)$/)) {
     var y = phrase.replace(x,'$1')
-    var response = role_members_names(message,y)
-    if (response) {reply(message,'members of '+y+': '+response)}
+    var members = role_members_names(message,y)
+    if (members){
+      console.log('managing this role')
+      var response = array_to_string(members)
+      reply(message,'members of '+y+': '+response)
+    }
   }
   if (phrase.match(x = /^change color ([^ ]+) ([^ ]+)$/)) {
     var success = change_role_colors(privileged,message,phrase.replace(x,'$1'),phrase.replace(x,'$2'))
@@ -256,7 +260,7 @@ function is_managing_role(role_name){
 
 function role_members_names(message,role_name){
   var role = message.channel.guild.roles.find('name',role_name)
-  if (role) {return array_to_string(role.members.array().map(member=>{return member.displayName}))}
+  if (role) {return role.members.array().map(member=>{return member.displayName})}
 }
 
 function reply(message,content){
