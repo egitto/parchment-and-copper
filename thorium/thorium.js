@@ -24,8 +24,20 @@ function guild_variables_path(guild){
 function set_globals_from_config_files(client){
   globals = {}
   client.guilds.array().map((guild)=>{
-    set_guild_globals(guild)
+    try{set_guild_globals(guild)}
+    catch(err){
+      initialize_guild(guild)
+    }
   })
+}
+  
+function initialize_guild(guild){
+        set_guild_globals({id: "TEMPLATE"})
+      globals[guild.id] = globals["TEMPLATE"]
+      save_guild_parameters(guild) // creates the config file
+      globals["TEMPLATE"] = undefined 
+      set_guild_globals(guild) // read from the config file; this puts the 'name' parameter in globals[guild.id]
+      save_guild_parameters(guild) // save so that the guildname parameter is in the config file
 }
 
 function set_guild_globals(guild){
@@ -62,6 +74,7 @@ client.on('ready', () => {
 
 client.on('message', message => {
   var guild = message.guild
+  if (globals[guild.id] == undefined) initialize_guild(guild)
   var x = /^[Tt]opicis:? (.*)/
   if (message.content.match(x)){
     // we don't want the bot to say 'topicis' because that interferes with users searching for that string
@@ -70,7 +83,7 @@ client.on('message', message => {
     log_message(new_message)
   }
   if (message.member){ // if the message is a pm, this will be null
-    var obey_this = !!(message.member.roles.find(item => {return globals[guild.id].obey_roles.has(item.name)}, true))
+    var obey_this = obey_member(message.member,guild)
     // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
     if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
       if (message.channel === log_channel(message)){
@@ -81,9 +94,19 @@ client.on('message', message => {
   }
 }) 
 
+// Emitted whenever the client joins a guild.
+client.on('guildCreate', guild=> initialize_guild(guild))
+
 client.on('messageReactionAdd', message_reaction => {
   respond_to_reaction(message_reaction)
 }) 
+
+function obey_member(member,guild){
+  var obey = false
+  obey = obey || !!(member.roles.find(item => {return globals[guild.id].obey_roles.has(item.name)}, true))
+  obey = obey || member.hasPermission(['MANAGE_GUILD'],false,true,true)
+  return obey
+}
 
 function respond_to_reaction(message_reaction){
   var guild = message_reaction.message.guild
