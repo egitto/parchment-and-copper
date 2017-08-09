@@ -4,15 +4,19 @@ var stdin = process.openStdin()
 var authpath = "auth.thorium.json"
 var auth = {}
 
+function is_yes(input) {return (input == "" || input == "Y" || input == "y" || input == "yes")}
+
+function is_n(input) {return (input == "N" || input == "n" || input == "no")}
+
 function input1(){
-  console.log("To configure Thorium, you will need to register a bot at https://discordapp.com/developers/applications/me")
-  console.log("Once there, select 'create a new app'\n Give it a name and a description, then save changes and click 'create a new bot user.'\n Copy down your Client ID and your Bot's token.\n\nopen https://discordapp.com/developers/applications/me now? Y/n")
+  console.log("To configure Thorium, you will need to:\n1) register a bot at https://discordapp.com/developers/applications/me")
+  console.log("2) select 'create a new app'\n3) give it a name and a description, then save changes and click 'create a new bot user.'\n4) copy down your Client ID and your Bot's token.\n\nopen https://discordapp.com/developers/applications/me now? Y/n")
   stdin.once("data",(d)=>{
     var d = ''+d.slice(0,d.length-1)
-    if(d == "" || d == "Y" || d == "y" || d == "yes"){
+    if(is_yes(d)){
       opn("https://discordapp.com/developers/applications/me")
       input2()
-    }else if(d == "N" || d == "n" || d == "no"){
+    }else if(is_n(d)){
       input2()
     }else{
       console.log('Unrecognized input.\nopen https://discordapp.com/developers/applications/me now? Y/n')
@@ -44,10 +48,10 @@ function input4(){
   console.log("Create new authentication file using token and client id? Y/n")
   stdin.once("data",(d)=>{
     var d = ''+d.slice(0,d.length-1)
-    if(d == "" || d == "Y" || d == "y" || d == "yes"){
+    if(is_yes(d)){
       fs.writeFileSync(authpath, JSON.stringify(auth))
       input5()
-    }else if(d == "N" || d == "n" || d == "no"){
+    }else if(is_n(d)){
       input5()
     }else{
       console.log('Unrecognized input.')
@@ -60,10 +64,10 @@ function input5(){
   console.log("Add bot to a guild/server? Requires you to have input client id. Y/n")
   stdin.once("data",(d)=>{
     var d = ''+d.slice(0,d.length-1)
-    if(d == "" || d == "Y" || d == "y" || d == "yes"){
+    if(is_yes(d)){
       opn(auth.register_on_guild)
       input6()
-    }else if(d == "N" || d == "n" || d == "no"){
+    }else if(is_no(d)){
       input6()
     }else{
       console.log('Unrecognized input.')
