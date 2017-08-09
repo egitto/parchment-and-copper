@@ -4,7 +4,6 @@ var stdin = process.openStdin()
 var authpath = "auth.thorium.json"
 var auth = {}
 
-
 function input1(){
   console.log("To configure Thorium, you will need to register a bot at https://discordapp.com/developers/applications/me")
   console.log("Once there, select 'create a new app'\n Give it a name and a description, then save changes and click 'create a new bot user.'\n Copy down your Client ID and your Bot's token.\n\nopen https://discordapp.com/developers/applications/me now? Y/n")
@@ -65,6 +64,7 @@ function input5(){
       console.log('Unrecognized input.')
       input5()
     }
+  })
 }
 
 function input6(){
