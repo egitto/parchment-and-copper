@@ -70,3 +70,5 @@ function input5(){
 function input6(){
   console.log("Configuration complete! Run 'node thorium.js' to get started")
 }
+
+input1()
