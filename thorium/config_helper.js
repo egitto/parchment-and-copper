@@ -45,7 +45,7 @@ function input4(){
   stdin.once("data",(d)=>{
     var d = d.slice(0,d.length-1)
     if(d == "" || d == "Y" || d == "y" || d == "yes"){
-      fs.fileWriteSync(authpath, JSON.stringify(auth))
+      fs.writeFileSync(authpath, JSON.stringify(auth))
       input5()
     }else if(d == "N" || d == "n" || d == "no"){
       input5()
