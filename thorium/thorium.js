@@ -32,12 +32,12 @@ function set_globals_from_config_files(client){
 }
   
 function initialize_guild(guild){
-        set_guild_globals({id: "TEMPLATE"})
-      globals[guild.id] = globals["TEMPLATE"]
-      save_guild_parameters(guild) // creates the config file
-      globals["TEMPLATE"] = undefined 
-      set_guild_globals(guild) // read from the config file; this puts the 'name' parameter in globals[guild.id]
-      save_guild_parameters(guild) // save so that the guildname parameter is in the config file
+  set_guild_globals({id: "TEMPLATE"})
+  globals[guild.id] = globals["TEMPLATE"]
+  save_guild_parameters(guild) // creates the config file
+  globals["TEMPLATE"] = undefined 
+  set_guild_globals(guild) // read from the config file; this puts the 'name' parameter in globals[guild.id]
+  save_guild_parameters(guild) // save so that the guildname parameter is in the config file
 }
 
 function set_guild_globals(guild){

@@ -1,0 +1,5 @@
+#!/bin/sh
+npm install
+mkdir config
+cp thorium_variables.EXAMPLE.json config/TEMPLATE.json
+node config_helper.js

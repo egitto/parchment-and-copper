@@ -19,5 +19,4 @@ None of thorium's variables are server-specific. If you want that, you'll need t
 Run 'node thorium.js'
 ## Known problems:
 Messages posted before the bot starts running won't be monitored for reactions.
-None of thorium's variables are server-specific.
 Thorium relies on role-names, which might not be that secure.
