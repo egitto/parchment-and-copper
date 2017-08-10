@@ -3,13 +3,13 @@ from math import ceil
 class PaddingError(Exception):
   pass
 
-def pad(text,blocksize):
+def pad(text,blocksize=16):
   length = ceil((len(text)+1)/blocksize)*blocksize
   pad = length - len(text)
   pad = int.to_bytes(pad,1,'big')*pad
   return text + pad
 
-def unpad(text,blocksize):
+def unpad(text,blocksize=16):
   pad = text[-1]
   # print(int.to_bytes(text[-1],1,'big')*pad,text[-pad:])
   if int.to_bytes(text[-1],1,'big')*pad == text[-pad:]:
