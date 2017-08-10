@@ -30,27 +30,28 @@ def parse_encrypted(cyphertext):
   print(a.ascii())
   return kv_parse(a.ascii())
 
-def bytes_oracle(input_bytes):
-  return oracle(data(input_bytes).ascii())
+def oracle_wrapper_for_decrypt_all(input_bytes):
+  return oracle(data(b'justgarbag'+input_bytes).ascii())[16:]
 
-# print(oracle(profile_for("foobar@fsd.com")))
-# print(profile_for("foobar@fsd.com").encode())
-print(parse_encrypted(oracle("foobar@fsd.com")))
-# find out what the code block containing just "com&uid=10&role=" looks like
-# find out what the code block containing just "admin&uid=10&rol" looks like, maybe? hm.
-# and then the block                           "email=justgarbag"
-# then combine them to make "email=fobar@fsd."+"com&uid=10&role="+"admin&uid=10&rol"+"email=justgarbag"
-# "email=fobar@fsd." = block 0 of oracle("fobar@fsd.com")
-# "com&uid=10&role=" = block 1 of oracle("fobar@fsd.com")
-# "admin&uid=10&rol" = block 1 of oracle("fobar@fsd.admin")
-# "email=justgarbag" = block 0 of oracle("justgarbag")
-# "\xF0"*16          = block 2 of oracle("ninechars")
-# this isn't a neat solution; it'll look like {"email": "fobar@fsd.com", "uid": "10", "role": "admin", "rolemail": "justgarbag"}
+# this doesn't work; eating '=' and '&' breaks it
+# print(decrypt_all(oracle_wrapper_for_decrypt_all))
 
-acc = b''
-acc += oracle("fobar@fsd.com"  )[(16*0):(16*1)]  # "email=fobar@fsd."  block 0
-acc += oracle("fobar@fsd.com"  )[(16*1):(16*2)]  # "com&uid=10&role="  block 1
-acc += oracle("fobar@fsd.admin")[(16*1):(16*2)]  # "admin&uid=10&rol"  block 1
-acc += oracle("justgarbag"     )[(16*0):(16*1)]  # "email=justgarbag"  block 0
-acc += oracle("ninechars"      )[(16*2):(16*3)]  # "\xF0"*16           block 2
-print(parse_encrypted(acc))
+# print(parse_encrypted(oracle("foobar@fsd.com")))
+# blocks to use: "email=fobar@fsd." + "com&uid=10&role=" + ("admin"+padding)
+# {"email": "fobar@fsd.com", "uid": "10", "role": "admin"}
+
+# "Using only the user input to profile_for() (as an oracle to generate "valid" ciphertexts) and the ciphertexts themselves, make a role=admin profile. " maybe this is cheating?
+# additional knowledge needed for this attack:
+# 1) type of padding used
+# 2) knowledge of the contents of the rest of the encrypted string
+# but I don't see a way to do it without this info.
+
+def get_admin_access():
+  acc = b''
+  acc += oracle("fobar@fsd.com"             )[(16*0):(16*1)]  # "email=fobar@fsd."  block 0
+  acc += oracle("fobar@fsd.com"             )[(16*1):(16*2)]  # "com&uid=10&role="  block 1
+  acc += oracle("fobar@fsd.admin"+chr(11)*11)[(16*1):(16*2)]  # "admin"+padding     block 1
+  print(parse_encrypted(acc))
+  return acc 
+
+get_admin_access()
