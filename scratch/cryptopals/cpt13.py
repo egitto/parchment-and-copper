@@ -1,24 +1,9 @@
 from cpt7 import *
 from cpt10 import *
 from cpt12 import *
+from padPKCS7 import PaddingError, pad, unpad
 from math import ceil
 import random
-
-class PaddingError(Exception):
-  pass
-
-def pad(text,blocksize):
-  length = ceil((len(text)+1)/blocksize)*blocksize
-  pad = length - len(text)
-  pad = int.to_bytes(pad,1,'big')*pad
-  return text + pad
-
-def unpad(text,blocksize):
-  pad = int.from_bytes(text[-1],'big')
-  if text[-1]*pad == text[-pad:]:
-    return text[:pad]
-  else:
-    raise PaddingError
 
 def kv_parse(string):
   #parses a string of key-value pairs and returns a dict of them (with string keys and values)
