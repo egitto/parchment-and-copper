@@ -1,17 +1,13 @@
 from ecb import *
 from cbc import *
 from math import ceil
-
-def pkcs7_pad(by,length):
-  pad = length - len(by)
-  pad = int.to_bytes(pad,1,'big')*pad
-  return by + pad
+from padPKCS7 import pad, unpad
 
 def oracle(input_bytes):
   unknown_string = data("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK",'b64').bytes
-  key = data("sdfKJH432480hnfidjanf430q9faioneskldzxcfndsant40iow802hnc",'b64').bytes[0:16] # I'm pretending not to know what either of these are
+  key = data("sdfKJH432480hnfidjanf430q9fa",'b64').bytes[0:16] # I'm pretending not to know what either of these are
   plaintext = input_bytes+unknown_string
-  plaintext = pkcs7_pad(plaintext,ceil(len(plaintext)/16)*16)
+  plaintext = pad(plaintext,16)
   return ECB_encrypt(plaintext,key)
 
 def find_block_size(oracle):
@@ -50,4 +46,4 @@ def decrypt_all(oracle=oracle):
     accum += decrypt_next(accum,i,all_chunked_frames,oracle,block_size)
   return accum[block_size:]
 
-# print(decrypt_all(oracle))
+print(decrypt_all(oracle))
