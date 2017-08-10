@@ -1,5 +1,5 @@
-from cpt7 import *
-from cpt10 import *
+from ecb import *
+from cbc import *
 from math import ceil
 
 def pkcs7_pad(by,length):

@@ -1,4 +1,4 @@
-from cpt10 import *
+from cbc import *
 import random
 
 def random_key():

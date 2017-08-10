@@ -1,5 +1,5 @@
-from cpt7 import *
-from cpt10 import *
+from ecb import *
+from cbc import *
 from cpt12 import *
 from padPKCS7 import PaddingError, pad, unpad
 from math import ceil
