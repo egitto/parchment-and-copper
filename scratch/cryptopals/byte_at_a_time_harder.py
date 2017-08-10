@@ -35,7 +35,7 @@ def find_cypherblock_of_filler(oracle,block_size):
 def create_cushion_for_random_prefix(oracle,block_size,filler_block):
   cushion_size = 0
   while histogram_blocks(chunk(oracle(b'a'*cushion_size),block_size)).get(filler_block,0) == histogram_blocks(chunk(oracle(b'z'*cushion_size),block_size)).get(filler_block,0):
-    # this is in case a frameshift would cause a filler_block to appear in the target-bytes region of cyphertext. we could get away with using `== 0` instead, but just in case. 
+    # this is in case a frameshift would cause a filler_block to appear in the target-bytes region of cyphertext. we could get away with using `== 0` instead, but target-bytes is plaintext and might contain b'aaaaaaaaaaaaaaaa' 
     cushion_size += 1
   return b'a'*cushion_size
 
