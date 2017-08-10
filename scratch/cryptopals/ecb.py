@@ -8,13 +8,13 @@ def apply(initial_value,fxns):
   for f in fxns: a = f(a)
   return a
 
-def ECB_decrypt(encrypted_bytes,key_bytes=b'YELLOW SUBMARINE'):
+def ECB_decrypt(encrypted_bytes,key=b'YELLOW SUBMARINE'):
   # text2 = base64.decodebytes(bytes(text,"UTF-8"))
-  encryption = AES.new(key_bytes, AES.MODE_ECB)
+  encryption = AES.new(key, AES.MODE_ECB)
   return encryption.decrypt(encrypted_bytes)
 
-def ECB_encrypt(plaintext_bytes,key_bytes=b'YELLOW SUBMARINE'):
-  encryption = AES.new(key_bytes, AES.MODE_ECB)
+def ECB_encrypt(plaintext_bytes,key=b'YELLOW SUBMARINE'):
+  encryption = AES.new(key, AES.MODE_ECB)
   return encryption.encrypt(plaintext_bytes)
 
 # key = data("YELLOW SUBMARINE")
@@ -33,7 +33,7 @@ def b64_file_to_bytes(path):
   text = "".join([x.strip() for x in text])
   return data(text,'b64').bytes
 
-text = b64_file_to_bytes('cryptopals_7.txt')
+# text = b64_file_to_bytes('cryptopals_7.txt')
 # print(ECB_decrypt(text,b'YELLOW SUBMARINE'))
 # print(ECB_decrypt(ECB_encrypt(ECB_decrypt(text))))
 # print(apply(text,[ECB_encrypt,ECB_encrypt,ECB_decrypt,ECB_decrypt,ECB_decrypt]))

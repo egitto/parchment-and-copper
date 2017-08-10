@@ -23,9 +23,8 @@ def transpose(array):
 # transpose(['This',' is ','just',' fin','e.'])
 
 def hamming_distance(a,b):
-  if type(a) == type(b) == str:
-    a = data(a)
-    b = data(b)
+  a = data(a)
+  b = data(b)
   return (a ^ b).bin().count('1')
 
 # print(hamming_distance("this is a test","wokka wokka!!!"))
