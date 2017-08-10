@@ -26,16 +26,31 @@ def oracle(input_string):
 
 def parse_encrypted(cyphertext):
   key = data("sdJH432480hnfidjao2hc",'b64').bytes
-  a = data(ECB_decrypt(cyphertext,key)).ascii()
-  print(a)
-  return kv_parse(a)
+  a = data(unpad(ECB_decrypt(cyphertext,key),16))
+  print(a.ascii())
+  return kv_parse(a.ascii())
 
 def bytes_oracle(input_bytes):
   return oracle(data(input_bytes).ascii())
 
-print(oracle(profile_for("foobar@fsd.com")))
-print(profile_for("foobar@fsd.com").encode())
+# print(oracle(profile_for("foobar@fsd.com")))
+# print(profile_for("foobar@fsd.com").encode())
 print(parse_encrypted(oracle("foobar@fsd.com")))
 # find out what the code block containing just "com&uid=10&role=" looks like
 # find out what the code block containing just "admin&uid=10&rol" looks like, maybe? hm.
-# email=foobar@fsd.com&uid=10&role=user
+# and then the block                           "email=justgarbag"
+# then combine them to make "email=fobar@fsd."+"com&uid=10&role="+"admin&uid=10&rol"+"email=justgarbag"
+# "email=fobar@fsd." = block 0 of oracle("fobar@fsd.com")
+# "com&uid=10&role=" = block 1 of oracle("fobar@fsd.com")
+# "admin&uid=10&rol" = block 1 of oracle("fobar@fsd.admin")
+# "email=justgarbag" = block 0 of oracle("justgarbag")
+# "\xF0"*16          = block 2 of oracle("ninechars")
+# this isn't a neat solution; it'll look like {"email": "fobar@fsd.com", "uid": "10", "role": "admin", "rolemail": "justgarbag"}
+
+acc = b''
+acc += oracle("fobar@fsd.com"  )[(16*0):(16*1)]  # "email=fobar@fsd."  block 0
+acc += oracle("fobar@fsd.com"  )[(16*1):(16*2)]  # "com&uid=10&role="  block 1
+acc += oracle("fobar@fsd.admin")[(16*1):(16*2)]  # "admin&uid=10&rol"  block 1
+acc += oracle("justgarbag"     )[(16*0):(16*1)]  # "email=justgarbag"  block 0
+acc += oracle("ninechars"      )[(16*2):(16*3)]  # "\xF0"*16           block 2
+print(parse_encrypted(acc))

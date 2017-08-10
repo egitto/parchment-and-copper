@@ -75,8 +75,6 @@ class data():
   def bin(self):
     """returns value as binary
     """
-    # print('bin value:',self.value)
-    # a = bin(self.value)[2:]
     a = bin(int.from_bytes(self.bytes,'big'))[2:]
     return '0'*(self.length-len(a)) + a
 
@@ -86,25 +84,12 @@ class data():
     a = self.bin()
     a = right_pad_chunk(a,8)
     return ''.join([chr(int(x,2)) for x in a])
-    # return str(self.bytes) # this one doesn't work, oddly.
+    # return str(self.bytes,'utf-8') # this one doesn't work, oddly.
 
   def b64(self):
     """returns value as b64
     """
-    # a = self.bin()
-    # a = right_pad_chunk(a,6)
-    # key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    # return ''.join([key[int(x,2)] for x in a])
     return base64.standard_b64encode(self.bytes)
-
-  # def __xor__(self,value):
-  #   ldiff = self.length - value.length
-  #   if ldiff > 0:
-  #     d = data(bin(self.value ^ (value.value << ldiff)),'bin')
-  #   else:
-  #     d = data(bin((self.value << -ldiff) ^ value.value),'bin')
-  #   d.length = max(self.length,value.length)
-  #   return(d)
 
   def __xor__(self,value):
     ldiff = self.length - value.length
