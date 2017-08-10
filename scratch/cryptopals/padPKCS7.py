@@ -10,8 +10,15 @@ def pad(text,blocksize):
   return text + pad
 
 def unpad(text,blocksize):
-  pad = int.from_bytes(text[-1],'big')
-  if text[-1]*pad == text[-pad:]:
-    return text[:pad]
+  pad = text[-1]
+  # print(int.to_bytes(text[-1],1,'big')*pad,text[-pad:])
+  if int.to_bytes(text[-1],1,'big')*pad == text[-pad:]:
+    return text[:-pad]
   else:
     raise PaddingError
+
+# print(unpad(pad(b'',4),4))
+# print(unpad(pad(b'a',4),4))
+# print(unpad(pad(b'as',4),4))
+# print(unpad(pad(b'asd',4),4))
+# print(unpad(pad(b'asdf',4),4))
