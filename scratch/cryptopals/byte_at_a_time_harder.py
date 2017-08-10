@@ -28,10 +28,25 @@ def histogram_blocks(blocks):
 
 def find_cypherblock_of_filler(oracle,block_size):
   filler = b'a'*block_size
-  more_filler_hist = histogram(chunk(oracle(filler*8),block_size))
-  less_filler_hist = histogram(chunk(oracle(filler*7),block_size))
+  more_filler_hist = histogram_blocks(chunk(oracle(filler*8),block_size))
+  less_filler_hist = histogram_blocks(chunk(oracle(filler*7),block_size))
   return {more_filler_hist[block]-less_filler_hist[block]: block for block in more_filler_hist.keys()}[1]
 
-filler_cyphered = find_cypherblock_of_filler(oracle,16)
+def create_cushion_for_random_prefix(oracle,block_size,filler_block):
+  cushion_size = 0
+  while histogram_blocks(chunk(oracle(b'a'*cushion_size),block_size)).get(filler_block,0) == histogram_blocks(chunk(oracle(b'z'*cushion_size),block_size)).get(filler_block,0):
+    # this is in case a frameshift would cause a filler_block to appear in the target-bytes region of cyphertext. we could get away with using `== 0` instead, but just in case. 
+    cushion_size += 1
+  return b'a'*cushion_size
 
-def wrapped_oracle(input_bytes):
+def decrypt_all(oracle):
+  block_size = find_block_size(oracle)['block_size']
+  filler_block = find_cypherblock_of_filler(oracle,block_size)
+  cushion = create_cushion_for_random_prefix(oracle,block_size,filler_block)
+  cushion_block_index = chunk(oracle(cushion),block_size).index(filler_block)
+  # technically the random-bytes prefix could contain filler_block, but it's very unlikely
+  def wrapped_oracle(input_bytes):
+    return oracle(cushion+input_bytes)[(1+cushion_block_index)*block_size:]
+  return cpt12.decrypt_all(wrapped_oracle)
+
+print(decrypt_all(oracle))
