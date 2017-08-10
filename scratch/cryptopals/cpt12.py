@@ -12,7 +12,7 @@ def oracle(input_bytes):
   key = data("sdfKJH432480hnfidjanf430q9faioneskldzxcfndsant40iow802hnc",'b64').bytes[0:16] # I'm pretending not to know what either of these are
   plaintext = input_bytes+unknown_string
   plaintext = pkcs7_pad(plaintext,ceil(len(plaintext)/16)*16)
-  return CBC_encrypt(plaintext,key)
+  return ECB_encrypt(plaintext,key)
 
 def find_block_size(oracle):
   l = len(oracle(b""))
