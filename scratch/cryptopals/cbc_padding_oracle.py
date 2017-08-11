@@ -22,31 +22,29 @@ def check_padding(iv,token):
 
 # print(check_padding(*encrypt_one_token()))
 
-def break_block(block,previous_block,oracle):
+def break_block(block,previous_block,oracle,blocksize):
   """Decrypts a block encrypted with CBC using a padding oracle. written to use check_padding.
   """
   right_bytes = b'' # invariant: rightbytes is the rightmost known bytes of plaintext.
   l = 0
-  def leftpad(_bytes): return b'\x00'*(16-len(_bytes))+_bytes
+  def leftpad(_bytes): return b'\x00'*(blocksize-len(_bytes))+_bytes
   all_bytes = [int.to_bytes(x,1,'big') for x in range(256)]
-  while l < 16:
-    padmask1 = pad(b'\x00'*(15-l)) # both padmasks have correct padding
-    padmask2 = pad(b'\xFF'*(15-l)) # therefore, (padmask ^ plaintext ^ (leftpad(right_bytes))) has correct padding
+  while l < blocksize:
+    padmask1 = pad(b'\x00'*(blocksize-1-l),blocksize) # both padmasks have correct padding
+    padmask2 = pad(b'\xFF'*(blocksize-1-l),blocksize) # therefore, (padmask ^ plaintext ^ (leftpad(right_bytes)) ^ previous_block) has correct padding
     for x in all_bytes:
       test_bytes = xor(leftpad(x+right_bytes),previous_block) #DUH
       if oracle(xor(test_bytes,padmask1),block) and oracle(xor(test_bytes,padmask2),block):
         right_bytes = x+right_bytes
-        # print(l)
         break
     l += 1
-  return xor(right_bytes,(b'\x00'*16))
+  return right_bytes
 
-def break_cbc_with_padding_oracle(iv,cyphertext,oracle):
+def break_cbc_with_padding_oracle(iv,cyphertext,oracle,blocksize=16):
   plaintext = b''
-  blocks = chunk(cyphertext,16)
-  prev_blocks = [iv] + chunk(cyphertext,16)[:-1]
-  for block, previous_block in zip(blocks,prev_blocks):
-    plaintext += break_block(block,previous_block,oracle)
-  return unpad(plaintext)
+  blocks = [iv]+chunk(cyphertext,blocksize)
+  for i in range(1,len(blocks)):
+    plaintext += break_block(blocks[i],blocks[i-1],oracle,blocksize)
+  return unpad(plaintext,blocksize)
 
 print(break_cbc_with_padding_oracle(*encrypt_one_token(),check_padding))
