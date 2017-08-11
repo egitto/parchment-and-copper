@@ -14,24 +14,25 @@ class data():
   def __init__(self,contents,data_type=''):
     """data(contents,data_type)
     contents is a string
-    data-type is in ['hex','bin','b64'] and describes format of string
+    data-type is in ['hex','bin','b64',''] and describes format of string; 
+    data-type of '' means bytes or utf-8 string
     """
     sizes = {'hex':4,'bin':1,'':8,'b64':6}
     self.length = sizes[data_type]*len(contents)
     if data_type == '':
       if type(contents) == str:
         self.bytes = bytes(contents,"UTF-8")
-        self.value = int.from_bytes(self.bytes,'big')
+        # self.value = int.from_bytes(self.bytes,'big')
       elif type(contents) == bytes:
-        self.value = int.from_bytes(contents,'big')
+        # self.value = int.from_bytes(contents,'big')
         self.bytes = contents
       else: assert False, 'data_type of \'\' requires bytes or str as contents, not '+type(contents)
     else:
       if data_type == 'b64':
         # self.length -= contents.count('=')*8
         if self.length <= 0: print(contents,'<- length error converting')
-        self.value = self.b64_to_long(contents)
-        self.bytes = self.value.to_bytes(ceil(self.length/8),'big')
+        self.bytes = self.b64_to_long(contents).to_bytes(ceil(self.length/8),'big')
+        # self.value = self.b64_to_long(contents)
         # self.value = int.from_bytes(self.bytes,'big')
       else:
         if len(contents)>2:
@@ -39,10 +40,10 @@ class data():
             contents = contents[2:]
             self.length -= 2
         if data_type == 'hex':
-          self.value = int(contents,16)
+          # self.value = int(contents,16)
           self.bytes = bytes.fromhex(contents)
         elif data_type == 'bin':
-          self.value = int(contents,2)
+          # self.value = int(contents,2)
           self.bytes = int(contents,2).to_bytes(ceil(self.length/8),'big')
 
   def b64_to_long(self,b64):
