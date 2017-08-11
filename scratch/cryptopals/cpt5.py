@@ -121,7 +121,8 @@ class data():
   def __rshift__(self,right):
     return data(self.bin()[:-right],'bin')
 
-
+def xor(a,b):
+  return (data(a)^data(b)).bytes
 
 def repeating_xor_crypt(text,key):
   key = data(key)
