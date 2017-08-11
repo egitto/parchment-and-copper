@@ -1,4 +1,4 @@
-from cpt5 import data
+from cpt5 import data, xor
 from cbc import CBC_encrypt, CBC_decrypt
 from padPKCS7 import pad, unpad, PaddingError
 import random
@@ -19,3 +19,21 @@ def check_padding(iv,token):
 
 # print(check_padding(*encrypt_one_token()))
 
+def break_block(block,oracle):
+  right_bytes = b'' # invariant: rightbytes is the rightmost known bytes of plaintext.
+  def l(): return len(right_bytes)
+  # to check if the last byte is '\x01': 
+  def leftpad(_bytes):
+    return b'\x00'*(16-len(_bytes))+_bytes
+  all_bytes = [int.to_bytes(x,1,'big') for x in range(256)]
+  while l() < 16:
+    padmask1 = pad(b'\x00'*(15-l()))[:16] # both padmasks have correct padding
+    padmask2 = pad(b'\xFF'*(15-l()))[:16] # therefore, (padmask ^ plaintext ^ (leftpad(right_bytes))) has correct padding
+    for x in all_bytes:
+      test_bytes = leftpad(x+right_bytes)
+      if oracle(xor(test_bytes,padmask1),block) and oracle(xor(test_bytes,padmask2),block):
+        right_bytes = x+right_bytes
+        break
+  return xor(right_bytes,(b'\xFF'*16))
+
+print(break_block(encrypt_one_token()[1][:16],check_padding))
