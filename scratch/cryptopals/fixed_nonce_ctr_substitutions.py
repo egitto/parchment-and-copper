@@ -3,7 +3,6 @@ from bytestring_tools import data, chunk, xor
 
 texts = open("cryptopals_19.txt").readlines()
 texts = [data(x.strip(),'b64').bytes for x in texts]
-for text in texts: print(text)
 texts = [CTR_encrypt(x,b"Yellow submarine",counter_function,0) for x in texts]
 
 abc = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ,!."\''
