@@ -18,7 +18,7 @@ def break_ragged_xor(cyphertexts):
     print(i,xor(b[i],key[i]*len(b[i])))
   return b''.join(key)
 
-key = break_ragged_xor(cyphertexts,)
+key = break_ragged_xor(cyphertexts)
 for x in cyphertexts:
   print(xor(x,key[:len(x)]))
 
