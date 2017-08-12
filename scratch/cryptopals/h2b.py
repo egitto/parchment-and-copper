@@ -99,22 +99,26 @@ c = "746865206b696420646f6e277420706c617"
 
 def plaintext_similarity_chi_sq(text):
   # frequencies from http://www.data-compression.com/english.html, truncated
+  if type(text) == str: assert False
   text = text.lower()
-  plain_freq = {'a': 0.0651, 'b': 0.0124, 'c': 0.0217, 'd': 0.0349, 'e': 0.1041, 'f': 0.0197, 'g': 0.0158, 'h': 0.0492, 'i': 0.0558, 'j': 0.0009, 'k': 0.005, 'l': 0.0331, 'm': 0.0202, 'n': 0.0564, 'o': 0.0596, 'p': 0.0137, 'q': 0.0008, 'r': 0.0497, 's': 0.0515, 't': 0.0729, 'u': 0.0225, 'v': 0.0082, 'w': 0.0171, 'x': 0.0013, 'y': 0.0145, 'z': 0.0007, ' ': 0.1918, 'ascii': 0.0001}
+  plain_freq = {b'a': 0.0651, b'b': 0.0124, b'c': 0.0217, b'd': 0.0349, b'e': 0.1041, b'f': 0.0197, b'g': 0.0158, b'h': 0.0492, b'i': 0.0558, b'j': 0.0009, b'k': 0.005, b'l': 0.0331, b'm': 0.0202, b'n': 0.0564, b'o': 0.0596, b'p': 0.0137, b'q': 0.0008, b'r': 0.0497, b's': 0.0515, b't': 0.0729, b'u': 0.0225, b'v': 0.0082, b'w': 0.0171, b'x': 0.0013, b'y': 0.0145, b'z': 0.0007, b' ': 0.1918, b'ascii': 0.0001}
   abc = set(plain_freq.keys())
   actual = {x: 0 for x in abc}
   score = 0
   for char in text: 
+    char = bytes([char])
     if char in abc: 
       actual[char] += 1
     # this is a dumb hack
-    else: actual['ascii'] += 1 
+    else: actual[b'ascii'] += 1 
   sum = len(text)
   expected = {char: plain_freq[char]*sum for char in abc}
   for x in actual.keys():
     score += ((expected[x]-actual[x])**2)/expected[x]
   # print(int(score),text)
   return score
+
+# print(plaintext_similarity_chi_sq(b"e"))
 
 def plaintext_similarity_count_ascii(text):
   text = text.lower()
