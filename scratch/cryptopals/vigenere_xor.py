@@ -100,28 +100,5 @@ def break_vigenere(cyphertext):
   print('key:',best_key)
   return [best_key,best_text]
 
-# for size in range(1,90):
-#   print(find_keysize(cyphertext,size)[:5])
-# # print(cyphertext.b64())
-decrypted = break_vigenere(cyphertext)
-print(decrypted)
-# print(data(decrypted[0]).xor_repeating(cyphertext).bin()[:16],'decrypted')
-# print(data(decrypted[0]).bin()[:16],'key')
-# print(cyphertext.bin()[:16],'cyphertext')
-# print(cyphertext.hex()[:4])
-# print(cyphertext.b64()[:3])
-
-# a = cyphertext
-# print(bytes(cyphertext.ascii()[0],'ascii'),'first character of cyphertext, to ascii, then to bytes')
-# print(a.hex()[:4],'cyphertext first 3 hex')
-
-# a = '///='
-# b = data(a,'b64')
-# c = 'a'
-# d = data(c)
-# print(b.bin())
-# print(b.hex())
-# e = d.xor_repeating(b)
-# print(e.bin(),'after xor')
-# print(d.bin(),'key')
-# print(b.bin(),'text')
+# decrypted = break_vigenere(cyphertext)
+# print(decrypted)
