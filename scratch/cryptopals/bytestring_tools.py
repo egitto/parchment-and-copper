@@ -75,6 +75,9 @@ class data():
     # return '0'*(self.length//4-len(a)) + a
     return self.bytes.hex()
 
+  def int(self):
+    return int.from_bytes(self.bytes,'big')
+
   def bin(self):
     """returns value as binary
     """
@@ -158,6 +161,6 @@ def test_bin():
     print(data(b,'bin').bytes)
 
 # test_b64()
-test_ascii()
+# test_ascii()
 # test_r_xor()
 # test_bin()
