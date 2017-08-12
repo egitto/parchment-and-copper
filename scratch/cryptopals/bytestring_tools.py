@@ -29,10 +29,11 @@ class data():
       else: assert False, 'data_type of \'\' requires bytes or str as contents, not '+type(contents)
     else:
       if data_type == 'b64':
-        # self.length -= contents.count('=')*8
         if self.length <= 0: print(contents,'<- length error converting')
-        # self.bytes = self.b64_to_long(contents).to_bytes(ceil(self.length/8),'big')
-        self.bytes = base64.standard_b64decode(contents)
+        self.bytes = self.b64_to_long(contents).to_bytes(ceil(self.length/8),'big')
+        self.length -= contents.count('=')*8
+        self.bytes = self.bytes[:ceil(self.length/8)]
+        # self.bytes = base64.standard_b64decode(contents)
         # self.value = self.b64_to_long(contents)
         # self.value = int.from_bytes(self.bytes,'big')
       else:
@@ -97,7 +98,7 @@ class data():
     ldiff = self.length - value.length
     v1 = int.from_bytes(self.bytes,'big')
     v2 = int.from_bytes(value.bytes,'big')
-    bytelength = ceil(max(self.length,value.length)/8)
+    bytelength = max(len(self.bytes),len(value.bytes))
     if ldiff > 0:
       d = data(int.to_bytes(v1 ^ (v2 << ldiff),bytelength,'big'))
     else:
@@ -157,6 +158,6 @@ def test_bin():
     print(data(b,'bin').bytes)
 
 # test_b64()
-# test_ascii()
+test_ascii()
 # test_r_xor()
 # test_bin()
