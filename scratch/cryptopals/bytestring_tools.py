@@ -31,7 +31,8 @@ class data():
       if data_type == 'b64':
         # self.length -= contents.count('=')*8
         if self.length <= 0: print(contents,'<- length error converting')
-        self.bytes = self.b64_to_long(contents).to_bytes(ceil(self.length/8),'big')
+        # self.bytes = self.b64_to_long(contents).to_bytes(ceil(self.length/8),'big')
+        self.bytes = base64.standard_b64decode(contents)
         # self.value = self.b64_to_long(contents)
         # self.value = int.from_bytes(self.bytes,'big')
       else:
