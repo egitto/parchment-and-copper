@@ -1,7 +1,8 @@
 from ecb import *
+from padPKCS7 import pad
 
 def CBC_decrypt(encrypted_bytes,key=b'YELLOW SUBMARINE',iv=bytes(16)):
-  blocks = chunk(encrypted_bytes,16)
+  blocks = chunk(encrypted_bytes,len(key))
   decrypted = b''
   a = data(iv)
   for cypherblock in blocks:
@@ -10,7 +11,8 @@ def CBC_decrypt(encrypted_bytes,key=b'YELLOW SUBMARINE',iv=bytes(16)):
   return decrypted
 
 def CBC_encrypt(plaintext_bytes,key=b'YELLOW SUBMARINE',iv=bytes(16)):
-  blocks = chunk(plaintext_bytes,16)
+  blocks = chunk(plaintext_bytes,len(key))
+  if len(plaintext_bytes)%len(key) != 0: raise ValueError('Input strings must be a multiple of keylength in length')
   encrypted = b''
   a = data(iv)
   for plainblock in blocks:
