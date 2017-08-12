@@ -33,5 +33,5 @@ class CTR_cypher():
     return x
 
 
-cyphertext = data('L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==','b64').bytes
-print(CTR_encrypt(cyphertext,"YELLOW SUBMARINE",counter_function,0))
+# cyphertext = data('L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==','b64').bytes
+# print(CTR_encrypt(cyphertext,"YELLOW SUBMARINE",counter_function,0))
