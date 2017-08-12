@@ -1,4 +1,4 @@
-from cpt5 import data, xor, chunk
+from bytestring_tools import data, xor, chunk
 from cbc import CBC_encrypt, CBC_decrypt
 from padPKCS7 import pad, unpad, PaddingError
 import random

@@ -1,4 +1,4 @@
-from cpt5 import *
+from bytestring_tools import *
 from math import ceil
 from h2b import plaintext_similarity_chi_sq as Xsq
 from h2b import plaintext_similarity_count_ascii as Xascii

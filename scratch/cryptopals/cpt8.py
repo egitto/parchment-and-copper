@@ -1,4 +1,4 @@
-from cpt5 import *
+from bytestring_tools import *
 
 def chunk(a,chunksize):
   return [a[i*chunksize:(i+1)*chunksize] for i in range(0,ceil(len(a)/chunksize))]

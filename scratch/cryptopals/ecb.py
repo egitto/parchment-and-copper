@@ -1,6 +1,6 @@
 #!/bin/python
 from Crypto.Cipher import AES 
-from cpt5 import *
+from bytestring_tools import *
 import base64
 
 def apply(initial_value,fxns):

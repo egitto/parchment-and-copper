@@ -1,7 +1,7 @@
 from cbc import CBC_encrypt, CBC_decrypt
 from padPKCS7 import pad, unpad
 import random
-from cpt5 import data
+from bytestring_tools import data
 
 key = int.to_bytes(random.getrandbits(16*8),16,'big')
 def cyphered_comment(comment):

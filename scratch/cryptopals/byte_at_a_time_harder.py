@@ -8,7 +8,7 @@ from ecb import *
 from cbc import *
 from math import ceil
 from padPKCS7 import pad, unpad
-from cpt5 import chunk
+from bytestring_tools import chunk
 import random
 
 prefix_length = random.randint(1,32)
