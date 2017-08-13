@@ -14,7 +14,7 @@ class twister():
     self.MT[0] = seed
     for i in range(1,len(self.MT)):
       self.MT[i] = (f*(self.MT[i-1]^(self.MT[i-1]>>(w-2)))+i)&((1<<32)-1)
-    print(self.MT)
+    # print(self.MT)
 
   class SeedError(Exception):
     pass
@@ -56,35 +56,25 @@ class twister():
       self.MT[i] = self.MT[(i+m)%n]^xA
     self.index = 0
 
+  def states(self):
+    return list(self.MT)
+
 def untwist(states):
   n, m, r, = 624, 397, 31
-  a = 0x9908B0DF
-  upper_mask = (1<<r)
-  lower_mask = upper_mask-1
+  a = 0x9908B0DF                    # notice that the first bit of a is 1
+  upper_mask = (1<<r)               # 0x80000000
+  lower_mask = upper_mask-1         # 0x7FFFFFFF
   MT = list(states)
   def retrieve_x(i):
     xA = MT[i]^MT[(i+m)%n]          # undoing: self.MT[i] = self.MT[(i+m)%n]^xA 
     was_xored = xA&0x80000000 >> 31 # did 'if x%2: xA^=a' happen? first bit of xA was originally 0 ('xA = x>>1')
-    xA = xA^a if was_xored else xA  # if so, undo it
-    x = (xA << 1) + was_xored       # if was_xored, then x%2==1
+    if was_xored: xA ^=a            # if so, undo it
+    x = (xA<<1)+was_xored           # if was_xored, then x%2==1
     return x                        # x = (MT[i]&uppermask)+(MT[(i+1)%n]&lowermask)
   for i in range(n-1,-1,-1):        # has to be done in reverse, of course
-    MT[i] = retrieve_x(i)&upper_mask + retrieve_x((i-1)%n)&lower_mask
+    MT[i] = (retrieve_x(i)&upper_mask) + (retrieve_x((i-1)%n)&lower_mask)
   return MT
 
-
-def undo_xor_lshift_mask(val,shift,mask):
-  x = val
-  print('starting undo')
-  i = 1
-  while mask != 0:
-    # print(x,'   val')
-    # pp(mask, 'mask')
-    # print((x<<(shift*i))&mask,'   val&mask')
-    x = x^((x<<(shift*i))&mask)
-    mask = (mask<<shift)&mask
-    i *= 2 # I don't really understand _why_ this works # that's because it doesn't
-  return x
 
 def pp(x,s=''):
   x = bin(x)[2:]
@@ -93,8 +83,6 @@ def pp(x,s=''):
 def bitmask(i,f):
   f = min(32,f)
   return 0xFFFFFFFF >> (32-f+i) << (32-f)
-
-print(bitmask(1,36))
 
 def undo_xor_lshift_mask(y,shift,mask=0xAAAAAAAA):
   views = [bitmask(i,i+shift) for i in range(0,32,shift)][::-1]
@@ -117,11 +105,13 @@ def retrieve_state(y):
   s, b = 7, 0x9D2C5680
   t, c = 15, 0xEFC60000
   y = (y^(y<<18))>>18
-  y ^= (y<<15)&c # this step is the same forwards as backwards
-  y = undo_xor_lshift_mask(y,7,b) # this step _isn't
-  y = undo_xor_rshift_mask(y,11,d) # this step _isn't
+  y = undo_xor_lshift_mask(y,15,c)
+  y = undo_xor_lshift_mask(y,7,b)
+  y = undo_xor_rshift_mask(y,11,d) 
   return(y)
 
 a = twister(0)
+first_states = a.states()
 states = [retrieve_state(a.extract_number()) for _ in range(624)]
-print(untwist(states))
+retrieved_states = untwist(states)
+print(sum([x==y for x,y in zip(first_states,retrieved_states)]))
