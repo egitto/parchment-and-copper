@@ -14,6 +14,7 @@ class twister():
     self.MT[0] = seed
     for i in range(1,len(self.MT)):
       self.MT[i] = (f*(self.MT[i-1]^(self.MT[i-1]>>(w-2)))+i)&((1<<32)-1)
+    print(self.MT)
 
   class SeedError(Exception):
     pass
@@ -53,7 +54,6 @@ class twister():
       xA = x>>1
       if x%2: xA^=a
       self.MT[i] = self.MT[(i+m)%n]^xA
-    print(self.MT)
     self.index = 0
 
 def untwist(states):
@@ -61,13 +61,16 @@ def untwist(states):
   a = 0x9908B0DF
   upper_mask = (1<<r)
   lower_mask = upper_mask-1
-  previous_states = [0]*624
-  for i in range(n-1,-1,-1):
-    for prev_mask in [0,0x800000]: # both possible values of (self.MT[i]&upper_mask)
-      x = prev_mask + ((states[(i+1)%n])&lower_mask) # that state is up-to-date, bc we're going backwards
-      xA = x>>1
-      if x%2: xA^=a
-      states
+  MT = list(states)
+  def retrieve_x(i):
+    xA = MT[i]^MT[(i+m)%n]          # undoing: self.MT[i] = self.MT[(i+m)%n]^xA 
+    was_xored = xA&0x80000000 >> 31 # did 'if x%2: xA^=a' happen? first bit of xA was originally 0 ('xA = x>>1')
+    xA = xA^a if was_xored else xA  # if so, undo it
+    x = (xA << 1) + was_xored       # if was_xored, then x%2==1
+    return x                        # x = (MT[i]&uppermask)+(MT[(i+1)%n]&lowermask)
+  for i in range(n-1,-1,-1):        # has to be done in reverse, of course
+    MT[i] = retrieve_x(i)&upper_mask + retrieve_x((i-1)%n)&lower_mask
+  return MT
 
 
 def undo_xor_lshift_mask(val,shift,mask):
@@ -121,4 +124,4 @@ def retrieve_state(y):
 
 a = twister(0)
 states = [retrieve_state(a.extract_number()) for _ in range(624)]
-print(states)
+print(untwist(states))
