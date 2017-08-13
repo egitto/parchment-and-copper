@@ -38,8 +38,6 @@ def undo_xor_rshift_mask(y,shift,mask=0xAAAAAAAA):
     acc |= ((acc >> shift)&mask ^ y)&view
   return acc 
 
-# [twister(i).extract_number() for i in range(40)]
-
 def retrieve_state(y):
   u, d = 11, 0xFFFFFFFF
   s, b = 7, 0x9D2C5680
@@ -49,3 +47,24 @@ def retrieve_state(y):
   y = undo_xor_lshift_mask(y,7,b)
   y = undo_xor_rshift_mask(y,11,d) 
   return(y)
+
+def mersenne_with_known_values(state):
+  return twister(0).set_state(state)
+
+def clone_mersenne(output_list):
+  """Output_list ideally has len(625) or more"""
+  n = 624
+  def verify_clone(a,future):
+    print(future)
+    return all([x == a.extract_number() for x in future])
+  state = [retrieve_state(x) for x in output_list[:n]]
+  a = mersenne_with_known_values(state)
+  if verify_clone(a,output_list[n:]): return a
+  print('cloning failed')
+
+a = twister(100)
+a.extract_numbers(50)
+v = a.extract_numbers(624)
+b = clone_mersenne(v)
+print(a.extract_numbers(6000) == b.extract_numbers(6000))
+print(a.index,b.index)

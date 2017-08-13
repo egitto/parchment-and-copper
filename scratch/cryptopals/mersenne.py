@@ -46,6 +46,9 @@ class twister():
     self.index += 1
     return y
 
+  def extract_numbers(self,n):
+    return [self.extract_number() for _ in range(n)]
+
   def twist(self):
     n, m, r, = 624, 397, 31
     a = 0x9908B0DF
@@ -62,6 +65,14 @@ class twister():
   def state(self):
     return list(self.MT)
 
+  def set_state(self,state,index=624):
+    self.MT = list(state)
+    self.index = index
+    return self
+
+  def clone(self):
+    return twister(0).set_state(self.MT,self.index)
+
 def get_seed(ith_output,i,_range):
   for x in _range:
     a = twister(x)
@@ -69,9 +80,9 @@ def get_seed(ith_output,i,_range):
       return x
   return 'seed not in range'
 
-time.sleep(50*random())
-a = twister(int(time.time()))
-time.sleep(50*random())
+# time.sleep(50*random())
+# a = twister(int(time.time()))
+# time.sleep(50*random())
 def find_when_seeded(x):
   print(get_seed(x.extract_number(),0,range(int(time.time()-2000),int(time.time()))))
 
