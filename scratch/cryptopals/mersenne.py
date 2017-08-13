@@ -28,7 +28,7 @@ class twister():
       if self.index > n: raise SeedError("Generator never seeded")
       self.twist()
     y = self.MT[self.index]
-    print(y,'actual state')
+    # print(y,'actual state')
     # pp(y, 'actual')
     # aa = y
     y ^= (y>>11)&d #is the masking necessary at all?
@@ -53,7 +53,21 @@ class twister():
       xA = x>>1
       if x%2: xA^=a
       self.MT[i] = self.MT[(i+m)%n]^xA
+    print(self.MT)
     self.index = 0
+
+def untwist(states):
+  n, m, r, = 624, 397, 31
+  a = 0x9908B0DF
+  upper_mask = (1<<r)
+  lower_mask = upper_mask-1
+  previous_states = [0]*624
+  for i in range(n-1,-1,-1):
+    for prev_mask in [0,0x800000]: # both possible values of (self.MT[i]&upper_mask)
+      x = prev_mask + ((states[(i+1)%n])&lower_mask) # that state is up-to-date, bc we're going backwards
+      xA = x>>1
+      if x%2: xA^=a
+      states
 
 
 def undo_xor_lshift_mask(val,shift,mask):
@@ -83,7 +97,6 @@ def undo_xor_lshift_mask(y,shift,mask=0xAAAAAAAA):
   views = [bitmask(i,i+shift) for i in range(0,32,shift)][::-1]
   acc = 0
   for view in views:
-    pp(acc)
     acc |= ((acc << shift)&mask ^ y)&view
   return acc
 
@@ -91,7 +104,6 @@ def undo_xor_rshift_mask(y,shift,mask=0xAAAAAAAA):
   views = [bitmask(i,i+shift) for i in range(0,32,shift)]
   acc = 0
   for view in views:
-    pp(acc)
     acc |= ((acc >> shift)&mask ^ y)&view
   return acc 
 
@@ -107,4 +119,6 @@ def retrieve_state(y):
   y = undo_xor_rshift_mask(y,11,d) # this step _isn't
   return(y)
 
-print(retrieve_state(twister(0).extract_number()))
+a = twister(0)
+states = [retrieve_state(a.extract_number()) for _ in range(624)]
+print(states)
