@@ -32,10 +32,10 @@ def undo_xor_lshift_mask(val,shift,mask):
   while mask != 0:
     print(x,'   val')
     pp(mask, 'mask')
-    print((x<<(shift*i))&mask,'   val&mask')
-    x = x^((x<<(shift*i))&mask)
-    mask = (mask<<shift)&mask
-    i *= 2
+    print((x<<(shift))&mask,'   val&mask')
+    x = x^((x<<(shift))&mask)
+    mask = (mask<<1)&mask
+    i += 1
   return x
 
 b = int(random.random()*2**32)
