@@ -76,7 +76,7 @@ def pp(x,s=''):
   print( '0'*(32-len(x))+x,s)
 
 
-# [twister(i).extract_number() for i in range(40)]
+[twister(i).extract_number() for i in range(40)]
 
 
 def retrieve_state(y):

@@ -1,3 +1,5 @@
+import random
+
 class xory(str):
   def __lshift__(self, shift):
     s = self.split(' ')[shift:]+['0']*shift
@@ -36,14 +38,15 @@ def undo_xor_lshift_mask(val,shift,mask):
     i *= 2
   return x
 
-b = 0x9D2C5680
+b = int(random.random()*2**32)
+shift = 7
 y = xory('a b c d e f g h i j k l m n o p q r s t u v w x y z 1 2 3 4 5 6')
-print(type(y<<7))
-print(type(((y<<7)&b)))
+print(type(y<<shift))
+print(type(((y<<shift)&b)))
 print(y)
-y = (y^((y<<7)&b))
+y = (y^((y<<shift)&b))
 print(y)
-y = undo_xor_lshift_mask(y,7,b)
+y = undo_xor_lshift_mask(y,shift,b)
 print(y,'           after first decode')
 print(xory('a b c d e') << 2)
 
