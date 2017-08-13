@@ -1,4 +1,6 @@
 from bytestring_tools import data, xor
+import time
+from random import random
 
 class twister():
   def __init__(self,seed):
@@ -14,7 +16,7 @@ class twister():
     self.MT[0] = seed
     for i in range(1,len(self.MT)):
       self.MT[i] = (f*(self.MT[i-1]^(self.MT[i-1]>>(w-2)))+i)&((1<<32)-1)
-    # print(self.MT)
+    # print(self.MT[:5],'initialized')
 
   class SeedError(Exception):
     pass
@@ -53,28 +55,28 @@ class twister():
       x = (self.MT[i]&upper_mask)+((self.MT[(i+1)%n])&lower_mask)
       xA = x>>1
       if x%2: xA^=a
-      self.MT[i] = self.MT[(i+m)%n]^xA
+      self.MT[i] = self.MT[(i+m)%n]^xA # the lower_mask part of MT[0] gets thrown away completely?? irretrievable
+    # print(self.MT[:5],'twisted')
     self.index = 0
 
-  def states(self):
+  def state(self):
     return list(self.MT)
 
-def untwist(states):
+def untwist(state):
   n, m, r, = 624, 397, 31
   a = 0x9908B0DF                    # notice that the first bit of a is 1
   upper_mask = (1<<r)               # 0x80000000
   lower_mask = upper_mask-1         # 0x7FFFFFFF
-  MT = list(states)
+  MT = list(state)
   def retrieve_x(i):
     xA = MT[i]^MT[(i+m)%n]          # undoing: self.MT[i] = self.MT[(i+m)%n]^xA 
-    was_xored = xA&0x80000000 >> 31 # did 'if x%2: xA^=a' happen? first bit of xA was originally 0 ('xA = x>>1')
+    was_xored = xA&0x80000000 != 0  # did 'if x%2: xA^=a' happen? first bit of xA was originally 0 ('xA = x>>1')
     if was_xored: xA ^=a            # if so, undo it
     x = (xA<<1)+was_xored           # if was_xored, then x%2==1
     return x                        # x = (MT[i]&uppermask)+(MT[(i+1)%n]&lowermask)
-  for i in range(n-1,-1,-1):        # has to be done in reverse, of course
+  for i in range(n-1,0,-1):         # has to be done in reverse, of course
     MT[i] = (retrieve_x(i)&upper_mask) + (retrieve_x((i-1)%n)&lower_mask)
   return MT
-
 
 def pp(x,s=''):
   x = bin(x)[2:]
@@ -110,8 +112,25 @@ def retrieve_state(y):
   y = undo_xor_rshift_mask(y,11,d) 
   return(y)
 
-a = twister(0)
-first_states = a.states()
-states = [retrieve_state(a.extract_number()) for _ in range(624)]
-retrieved_states = untwist(states)
-print(sum([x==y for x,y in zip(first_states,retrieved_states)]))
+def get_seed(ith_output,i,_range):
+  for x in _range:
+    a = twister(x)
+    if [a.extract_number() for y in range(0,i+1)][-1] == ith_output:
+      return x
+  return 'seed not in range'
+
+time.sleep(50*random())
+a = twister(int(time.time()))
+time.sleep(50*random())
+def find_when_seeded(x):
+  print(get_seed(x.extract_number(),0,range(int(time.time()-2000),int(time.time()))))
+
+# first_state = a.state()
+# print(first_state[:5])
+# a.twist()
+# state = [retrieve_state(a.extract_number()) for _ in range(624)]
+# retrieved_state = untwist(state)
+# print(retrieved_state[:5])
+# print(''.join(['1' if x==y else '.' for x,y in zip(first_state,retrieved_state)]))
+# print(sum([1 if x==y else 0 for x,y in zip(first_state,retrieved_state)]))
+# 
