@@ -28,14 +28,14 @@ class twister():
       if self.index > n: raise SeedError("Generator never seeded")
       self.twist()
     y = self.MT[self.index]
-    y ^= (y>>11)&d #is the masking necessary at all?
     pp(y, 'actual')
     aa = y
-    y ^= (y<<7)&b
+    y ^= (y>>11)&d #is the masking necessary at all?
     pp(y, 'encoded')
     bb = y
-    bb = undo_xor_lshift_mask(y,7,b)
+    bb = undo_xor_rshift_mask(y,11,d)
     print(bin(bb),aa==bb,bin(aa^bb))
+    y ^= (y<<7)&b
     y ^= (y<<15)&c
     y ^= (y>>18)
     y = y&((1<<w)-1)
@@ -85,6 +85,14 @@ def undo_xor_lshift_mask(y,shift,mask=0xAAAAAAAA):
     pp(acc)
     acc |= ((acc << shift)&mask ^ y)&view
   return acc
+
+def undo_xor_rshift_mask(y,shift,mask=0xAAAAAAAA):
+  views = [bitmask(i,i+shift) for i in range(0,32,shift)]
+  acc = 0
+  for view in views:
+    pp(acc)
+    acc |= ((acc >> shift)&mask ^ y)&view
+  return acc 
 
 [twister(i).extract_number() for i in range(40)]
 
