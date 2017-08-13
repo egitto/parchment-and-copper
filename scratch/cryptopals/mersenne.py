@@ -29,14 +29,11 @@ class twister():
       self.twist()
     y = self.MT[self.index]
     y ^= (y>>11)&d #is the masking necessary at all?
-    print(bin(y))
+    pp(y, 'actual')
     aa = y
     y ^= (y<<7)&b
-    print(bin(y))
+    pp(y, 'encoded')
     bb = y
-    bb = (bb^((bb<<7)&b))
-    bb = (bb^((bb<<7)&(b&(b<<7))))
-    # bb = (bb^((bb<<7)&(b&(b<<14)&(b<<7))))
     bb = undo_xor_lshift_mask(y,7,b)
     print(bin(bb),aa==bb,bin(aa^bb))
     y ^= (y<<15)&c
@@ -68,13 +65,26 @@ def undo_xor_lshift_mask(val,shift,mask):
     # print((x<<(shift*i))&mask,'   val&mask')
     x = x^((x<<(shift*i))&mask)
     mask = (mask<<shift)&mask
-    i *= 2 # I don't really understand _why_ this works
+    i *= 2 # I don't really understand _why_ this works # that's because it doesn't
   return x
 
 def pp(x,s=''):
   x = bin(x)[2:]
   print( '0'*(32-len(x))+x,s)
 
+def bitmask(i,f):
+  f = min(32,f)
+  return 0xFFFFFFFF >> (32-f+i) << (32-f)
+
+print(bitmask(1,36))
+
+def undo_xor_lshift_mask(y,shift,mask=0xAAAAAAAA):
+  views = [bitmask(i,i+shift) for i in range(0,32,shift)][::-1]
+  acc = 0
+  for view in views:
+    pp(acc)
+    acc |= ((acc << shift)&mask ^ y)&view
+  return acc
 
 [twister(i).extract_number() for i in range(40)]
 
