@@ -28,13 +28,14 @@ class twister():
       if self.index > n: raise SeedError("Generator never seeded")
       self.twist()
     y = self.MT[self.index]
-    pp(y, 'actual')
-    aa = y
+    print(y,'actual state')
+    # pp(y, 'actual')
+    # aa = y
     y ^= (y>>11)&d #is the masking necessary at all?
-    pp(y, 'encoded')
-    bb = y
-    bb = undo_xor_rshift_mask(y,11,d)
-    print(bin(bb),aa==bb,bin(aa^bb))
+    # pp(y, 'encoded')
+    # bb = y
+    # bb = undo_xor_rshift_mask(y,11,d)
+    # print(bin(bb),aa==bb,bin(aa^bb))
     y ^= (y<<7)&b
     y ^= (y<<15)&c
     y ^= (y>>18)
@@ -94,8 +95,7 @@ def undo_xor_rshift_mask(y,shift,mask=0xAAAAAAAA):
     acc |= ((acc >> shift)&mask ^ y)&view
   return acc 
 
-[twister(i).extract_number() for i in range(40)]
-
+# [twister(i).extract_number() for i in range(40)]
 
 def retrieve_state(y):
   u, d = 11, 0xFFFFFFFF
@@ -104,6 +104,7 @@ def retrieve_state(y):
   y = (y^(y<<18))>>18
   y ^= (y<<15)&c # this step is the same forwards as backwards
   y = undo_xor_lshift_mask(y,7,b) # this step _isn't
-  y = undo_xor_lshift_mask(y,7,b) # this step _isn't
-  y ^= (y>>11)&d
+  y = undo_xor_rshift_mask(y,11,d) # this step _isn't
   return(y)
+
+print(retrieve_state(twister(0).extract_number()))
