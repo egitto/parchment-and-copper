@@ -1,6 +1,7 @@
 # from h2b import *
 from math import ceil
 import base64
+import random
 
 def chunk(a,chunksize):
   return [a[i*chunksize:(i+1)*chunksize] for i in range(0,ceil(len(a)/chunksize))]
@@ -128,6 +129,9 @@ class data():
 
 def xor(a,b):
   return (data(a)^data(b)).bytes
+
+def random_bytes(n=16):
+  return int.to_bytes(random.getrandbits(n*8),n,'big')
 
 def repeating_xor_crypt(text,key):
   key = data(key)
