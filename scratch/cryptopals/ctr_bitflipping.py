@@ -1,9 +1,9 @@
 from ctr import CTR_encrypt
 from padPKCS7 import pad, unpad
 import random
-from bytestring_tools import data
+from bytestring_tools import data, random_bytes
 
-key = int.to_bytes(random.getrandbits(16*8),16,'big')
+key = random_bytes(16)
 def cyphered_comment(comment):
   comment = '"comment1=cooking%20MCs;userdata="'+data(comment).ascii().replace("=","\=").replace(";","\;")+'";comment2=%20like%20a%20pound%20of%20bacon"'
   return CTR_encrypt(pad(data(comment).bytes),key) #counterfunction and nonce have default values
