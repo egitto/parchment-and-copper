@@ -18,7 +18,7 @@ def CTR_keystream(key,counter_function,length,start):
     accum += ECB_encrypt(counter_function(block_n),key)
   return accum[:length]
 
-def CTR_encrypt(_bytes,key,counter_function,nonce):
+def CTR_encrypt(_bytes,key,counter_function=counter_function,nonce=0):
   return xor(_bytes,CTR_keystream(key,counter_function,len(_bytes),nonce))
 
 class CTR_cypher():
