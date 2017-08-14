@@ -22,16 +22,24 @@ def CTR_encrypt(_bytes,key,counter_function,nonce):
   return xor(_bytes,CTR_keystream(key,counter_function,len(_bytes),nonce))
 
 class CTR_cypher():
-  def __init__(self,key,counter_function,nonce):
+  def __init__(self,key,counter_function=counter_function,nonce=0):
     self.key = key
     self.counter_function = counter_function
+    self.zero = nonce
     self.n = nonce
+
+  def set_offset(self,offset):
+    self.n = self.zero + offset
 
   def encrypt(self,_bytes):
     x = CTR_encrypt(_bytes,self.key,self.counter_function,self.n)
     self.n += len(_bytes)
     return x
 
+# a = CTR_cypher(b'yellow submarine',counter_function,0)
+# b = a.encrypt(b'some stuff')
+# a.set_offset(0)
+# print(a.encrypt(b))
 
 # cyphertext = data('L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==','b64').bytes
 # print(CTR_encrypt(cyphertext,"YELLOW SUBMARINE",counter_function,0))
