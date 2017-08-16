@@ -1,0 +1,17 @@
+{
+  "name": "arundel_manuscripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "download_and_stitch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "deasync": "^0.1.10",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "underscore": "^1.8.3"
+  }
+}
