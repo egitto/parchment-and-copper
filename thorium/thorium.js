@@ -131,11 +131,12 @@ function parse_command(message,text_to_parse,privileged){
   }
   if (phrase.match(x = /^(add|send|fly|drag) me to (.+?)$/)) {
     var y = phrase.replace(x,'$2')
+    if (user.roles.find('name',y)) {reply(message,"You're already in "+y+", silly!")}
     if (!is_managing_role(y,guild)) {reply(message,"I'm not managing the role "+y); list_managing(message)}
     globals[guild.id].managed_roles.map((role) => {if ((role.name === y)&& !user.roles.has(role.id) &&user.guild.roles.has(role.id)) {
       var forbidden
-      if ((forbidden = forbidden_permissions_of(guild.roles.get(role.id))).length == 0)
-      {user.addRole(role.id).then(
+      if ((forbidden = forbidden_permissions_of(guild.roles.get(role.id))).length == 0){
+        user.addRole(role.id).then(
         ()=> message.react("✅")).catch((err)=>reply(message,""+err))}
       else {reply(message,"that role has forbidden permission(s): "+array_to_string(forbidden))}
     }})
