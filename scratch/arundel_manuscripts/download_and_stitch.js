@@ -38,7 +38,7 @@ var get_page = async (page_string, rows, cols) => {
 
 var get_image = (page_string, row, col) => {
   var url = 'http://www.bl.uk/manuscripts/Proxy.ashx?view='+page_string+'_files/13/'+col+'_'+row+'.jpg'
-  var path = page_string+'/'+page_string.match(/f\d\d\d\w/)[0]+'_r'+pad_int(row)+'_c'+pad_int(col)+'.jpg'
+  var path = 'results/'+page_string+'/'+page_string.match(/f\d\d\d\w/)[0]+'_r'+pad_int(row)+'_c'+pad_int(col)+'.jpg'
   return download(url, path)
 }
 
@@ -65,7 +65,7 @@ var process_downloaded = (dest) => {
 
 var stitch_image = (page, rmax, cmax) => {
   console.log('stitch called')
-  exec('montage -geometry +0+0 -tile '+(cmax+1)+'x'+(rmax+1)+' '+page+'/* '+page+'.jpg',
+  exec('montage -geometry +0+0 -tile '+(cmax+1)+'x'+(rmax+1)+' results/'+page+'/* results/'+page+'.jpg',
     function (error, stdout, stderr) {
       console.log('stdout: ' + stdout)
       console.log('stderr: ' + stderr)
