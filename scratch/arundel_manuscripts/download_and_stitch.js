@@ -36,7 +36,7 @@ var get_pages = (pages, rows, cols) => {
 
 var get_page = (page_string, rows, cols) => {
   try{fs.mkdirSync('results/'+page_string)}catch(e){} // each page gets its own folder
-  q = _.range(rows).map(r => _.range(cols).map(c => [page_string, r, c]))._.flatten(true) // queue
+  q = rows.map(r => cols.map(c => [page_string, r, c]))._.flatten(true) // queue
   q = Promise.map(q, x => get_image(...x),{concurrency: 1}).all()  // q is a promise of an array now
   q = q.then((p_arr) => {
     console.log('in q.then')
@@ -92,7 +92,7 @@ var stitch_image = (page, rmax, cmax) => {
 
 // to get the entire image, you'll want get_pages([indicies, 12, 16])
 // this is the second-highest resolution; for highest resolution, change '_files/13/' to 14
-get_pages(_.range(30), 12, 16)
+get_pages([1,2,3,4,5], _.range(12), _.range(18))
 
 // console.log([2].map(page_string).forEach(page_string => {
 //   // get_page(page_string, 12, 16)
