@@ -26,8 +26,8 @@ var get_page = (i, rows, cols, z) => {
   return q.then((p_arr) => {
     // console.log('in q.then')
     // console.log(p_arr)
-    r = _.max(p_arr.map(x => x.r))
-    c = _.max(p_arr.map(x => x.c))
+    var r = _.max(p_arr.map(x => x.r))
+    var c = _.max(p_arr.map(x => x.c))
     stitch_image(page_string(i), r, c, i)
     return true
   }).delay(5000)
