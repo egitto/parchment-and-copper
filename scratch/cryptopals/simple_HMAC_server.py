@@ -1,18 +1,18 @@
-from bottle import route, run, template, HTTPResponse
+from bottle import route, run, template, HTTPResponse, request
 from bytestring_tools import random_bytes, data
 from sha1_from_external_source import sha1 as sha1
 
-@route('/<request>')
-def process_request(request):
-    r = request[request.index('?')+1:]
-    r = r.split('&').split('=')
-    r = {r[i][0]: r[i][1] for i in range(len(r)) if len(r[i]) == 2}
-    valid = insecure_compare(HMAC(key,r.get('file','')),r.get('signature',''))
-    if valid: raise HTTPResponse(status=200)
-    else: raise HTTPResponse(status=500)
+@route('/test')
+def process_request():
+  file = request.query.file
+  signature = request.query.signature
+  valid = insecure_compare(HMAC(key,file),signature)
+  if valid: raise HTTPResponse(status=200)
+  else: raise HTTPResponse(status=500)
 
 def HMAC(K,m):
-  Kp = K
+  Kp = data(K)  
+  m = data(m).byte
   if len(K) < 64: Kp = data(b'\x00'*(64-len(K))+K)
   elif len(K) > 64: Kp = data(sha1(K),'hex')
   opad = data(b'\x5c'*64) ^ Kp
