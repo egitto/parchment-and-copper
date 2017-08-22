@@ -58,7 +58,7 @@ def password_token_generate():
 def is_MT_seeded_with_time(cyphertext):
   t = int(time.time())%2**16
   l = len(cyphertext)
-  for t in range(t,t-10,-1): # lets check the last 10 seconds too
+  for t in range(t,t-600,-1): # lets check the last 10 seconds too
     key = int.to_bytes(t,2,'big')
     if MT_cypher(key).keystream(l) == cyphertext: return True
   return False
