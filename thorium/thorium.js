@@ -72,7 +72,18 @@ client.on('ready', () => {
   console.log('Ready!')
 })
 
-client.on('message', message => {
+client.on('message', process_message) 
+
+client.on('messageUpdate', (old_message,new_message) => process_message(new_message))
+
+// Emitted whenever the client joins a guild.
+client.on('guildCreate', guild=> initialize_guild(guild))
+
+client.on('messageReactionAdd', message_reaction => {
+  respond_to_reaction(message_reaction)
+}) 
+
+function process_message(message) {
   var guild = message.guild
   if (globals[guild.id] == undefined) initialize_guild(guild)
   var x = /^[Tt]opicis:? (.*)/
@@ -92,14 +103,7 @@ client.on('message', message => {
       }
     }
   }
-}) 
-
-// Emitted whenever the client joins a guild.
-client.on('guildCreate', guild=> initialize_guild(guild))
-
-client.on('messageReactionAdd', message_reaction => {
-  respond_to_reaction(message_reaction)
-}) 
+}
 
 function obey_member(member,guild){
   var obey = false
