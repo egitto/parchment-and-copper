@@ -2,9 +2,6 @@ import time
 import requests
 import numpy
 
-class HMAC_found(Exception):
-  pass
-
 def timer(f):
   def wrapper(*args, **kwargs):
     a = time.time()
