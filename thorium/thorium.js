@@ -6,15 +6,12 @@ var variable_storage_path = 'thorium_variables.json'
 var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
 client.login(auth_discord_thorium).catch(err => {console.log('login_error'); throw err})
 
-// Set.prototype.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
-
 function set_globals_from_json(json){
   var x = JSON.parse(json)
   globals = x
   globals[guild.id].watched_emojii = new Set(x.watched_emojii)
   globals[guild.id].obey_roles = new Set(x.obey_roles)
   globals[guild.id].obey_roles.toJSON = globals[guild.id].watched_emojii.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
-  // console.log(json)
 }
 
 function guild_variables_path(guild){
@@ -24,7 +21,7 @@ function guild_variables_path(guild){
 function set_globals_from_config_files(client){
   globals = {}
   client.guilds.array().map(guild => {
-    try{set_guild_globals(guild)}
+    try{read_guild_globals(guild)}
     catch(err){
       initialize_guild(guild)
     }
@@ -32,15 +29,15 @@ function set_globals_from_config_files(client){
 }
   
 function initialize_guild(guild){
-  set_guild_globals({id: "TEMPLATE"})
+  read_guild_globals({id: "TEMPLATE"}) // reads template config file into globals["TEMPLATE"]
   globals[guild.id] = globals["TEMPLATE"]
   save_guild_parameters(guild) // creates the config file
   globals["TEMPLATE"] = undefined 
-  set_guild_globals(guild) // read from the config file; this puts the 'name' parameter in globals[guild.id]
+  read_guild_globals(guild) // read from the config file; this puts the 'name' parameter in globals[guild.id]
   save_guild_parameters(guild) // save so that the guildname parameter is in the config file
 }
 
-function set_guild_globals(guild){
+function read_guild_globals(guild){
   var x = JSON.parse(''+fs.readFileSync(guild_variables_path(guild)))
   globals[guild.id] = x
   globals[guild.id].name = guild.name // for some semblance of human readability
@@ -48,8 +45,6 @@ function set_guild_globals(guild){
   globals[guild.id].obey_roles = new Set(x.obey_roles)
   globals[guild.id].obey_roles.toJSON = globals[guild.id].watched_emojii.toJSON = function toJSON() {return [...Set.prototype.values.call(this)]}
 }
-
-// set_globals_from_json('' + fs.readFileSync(variable_storage_path))
 
 function array_to_string(arr){
   return arr.reduce(function(accumulator,item){return accumulator + item + ', '},'').replace(/, $/,"")
@@ -59,11 +54,9 @@ function set_to_pretty_string(set){
   return array_to_string([...set])
 }
 
-
 var JSON_pretty = x => JSON.stringify(x,null,'  ')
 var save_guild_parameters = guild => fs.writeFileSync(guild_variables_path(guild),JSON_pretty(globals[guild.id]))
 
-// console.log(JSON.stringify(globals))
 console.log('loading...')
 
 client.on('ready', () => {
@@ -76,8 +69,7 @@ client.on('message', process_message)
 
 client.on('messageUpdate', (old_message,new_message) => process_message(new_message)) // respond to edited messages as if they were new
 
-// Emitted whenever the client joins a guild.
-client.on('guildCreate', guild => initialize_guild(guild))
+client.on('guildCreate', guild => initialize_guild(guild)) // called when client _joins_ a guild, despite name
 
 client.on('messageReactionAdd', message_reaction => {
   respond_to_reaction(message_reaction)
@@ -239,8 +231,7 @@ function parse_command(message,text_to_parse,privileged){
   }
   if (phrase.match(x = /^list permissions$/)) {
     response = 'Forbidden permissions: '+array_to_string(globals[guild.id].dangerous_permissions)
-    console.log(typeof(user.permissionsIn(message.channel).serialize()))
-    response += '\n\nYour permissions: '+array_to_string(Object.keys(user.permissionsIn(message.channel).serialize()))
+    response += '\n\nAll permissions: '+array_to_string(Object.keys(user.permissionsIn(message.channel).serialize()))
   }
   if (phrase.match(x = /^forbid permission (.+)$/)) {
     var y = phrase.replace(x,'$1').toUpperCase()
