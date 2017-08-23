@@ -149,7 +149,7 @@ function parse_command(message,text_to_parse,privileged){
         ()=> message.react("✅")).catch((err)=>reply(message,""+err))}})
   }
   if (phrase.match(x = /^help$/)) {
-    reply(message,"Help on what topic? roles, mod commands, mod roles, logging")
+    reply(message,"Help on what topic? roles, mod commands, mod roles, logging, permissions")
   }
   if (phrase.match(x = /^(help )?mod roles$/)) {
     reply(message,"I consider the following roles mods to obey: "+set_to_pretty_string(globals[guild.id].obey_roles))
@@ -160,7 +160,10 @@ function parse_command(message,text_to_parse,privileged){
       +" log the message in #"+globals[guild.id].log_channel_name+".")
   }
   if (phrase.match(x = /^(help )?mod commands$/)) {
-    reply(message,'Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role -> $newname')
+    reply(message,'Mods can control me with these commands: \nthreshold $number, watch $emoji, unwatch $emoji, obey $role, disobey $role, change log channel $channel, dump parameters, shut down without confirmation, manage $role, unmanage $role, change color $role $color, rename $role -> $newname, list permissions, forbid permission $permission, permit permission $permission')
+  }
+  if (phrase.match(x = /^(help )?permissions$/)) {
+    reply(message,'I maintain a list of "forbidden" permissions as a minor security measure. I can not add people to roles that provide these permissions. Mods can view and edit this list with the following commands: list permissions, forbid permission $permission, permit permission $permission')
   }
   if (phrase.match(x = /^list roles$/)) {
     reply(message,"I can add or remove members of these roles: " 
@@ -230,6 +233,21 @@ function parse_command(message,text_to_parse,privileged){
     globals[guild.id].log_channel_name = phrase.replace(x,'$1')
     response = 'New channel: ' + globals[guild.id].log_channel_name
   }
+  if (phrase.match(x = /^list permissions$/)) {
+    response = 'Forbidden permissions: '+array_to_string(globals[guild.id].dangerous_permissions)
+    console.log(typeof(user.permissionsIn(message.channel).serialize()))
+    response += '\n\nYour permissions: '+array_to_string(Object.keys(user.permissionsIn(message.channel).serialize()))
+  }
+  if (phrase.match(x = /^forbid permission (.+)$/)) {
+    var y = phrase.replace(x,'$1').toUpperCase()
+    globals[guild.id].dangerous_permissions.push(y)
+    response = 'Forbid permission "'+y+'"'
+  }
+  if (phrase.match(x = /^permit permission (.+)$/)) {
+    var y = phrase.replace(x,'$1').toUpperCase()
+    globals[guild.id].dangerous_permissions = globals[guild.id].dangerous_permissions.filter(x => {return x !== y})
+    response = 'Permitted permission "'+y+'"'
+  }
   if (phrase === 'dump parameters') {
     response = '```'+JSON_pretty(globals)+'```'
   }
@@ -239,6 +257,8 @@ function parse_command(message,text_to_parse,privileged){
   if (response) {reply(message,response)}
   console.log('Command finished')
 }
+
+function add_role_to_member(member,role_name){}
 
 function change_role_colors(privileged,message,role_name,color){
   console.log('changing',role_name,color)

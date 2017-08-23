@@ -26,5 +26,6 @@ def insecure_compare(s1,s2):
     time.sleep(0.05)
   return True
 
-key = random_bytes(64)
+key = b"this is the test key"
+print(HMAC(key,b'message'))
 run(host='localhost', port=8080, debug=True)
