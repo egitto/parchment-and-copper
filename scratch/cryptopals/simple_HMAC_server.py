@@ -1,6 +1,7 @@
 from bottle import route, run, template, HTTPResponse, request
 from bytestring_tools import random_bytes, data
 from sha1_from_external_source import sha1 as sha1
+import time
 
 @route('/test')
 def process_request():
@@ -12,7 +13,7 @@ def process_request():
 
 def HMAC(K,m):
   Kp = data(K)  
-  m = data(m).byte
+  m = data(m).bytes
   if len(K) < 64: Kp = data(b'\x00'*(64-len(K))+K)
   elif len(K) > 64: Kp = data(sha1(K),'hex')
   opad = data(b'\x5c'*64) ^ Kp
@@ -22,8 +23,8 @@ def HMAC(K,m):
 def insecure_compare(s1,s2):
   if len(s1) != len(s2): return False
   for i in range(len(s1)):
+    time.sleep(0.001)
     if s1[i] != s2[i]: return False
-    time.sleep(0.05)
   return True
 
 key = b"this is the test key"
