@@ -105,6 +105,7 @@ function obey_member(member,guild){
 
 function respond_to_reaction(message_reaction){
   var guild = message_reaction.message.guild
+  if (!guild) return // don't process pms at all
   var emoji_name = message_reaction._emoji.name 
   var reacts = message_reaction.count
   console.log('reaction spotted: ' + emoji_name + ' in #' + message_reaction.message.channel.name)
