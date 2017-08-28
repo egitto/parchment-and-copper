@@ -63,7 +63,7 @@ var save_guild_parameters = guild => fs.writeFileSync(guild_variables_path(guild
 
 
 console.log('loading...')
-v && console.log('Verbose mode enabled)
+v && console.log('Verbose mode enabled')
                  
 client.on('ready', () => {
   console.log('Connected, loading config...')
