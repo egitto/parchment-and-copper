@@ -1,7 +1,10 @@
 const Discord = require('discord.js')
 const client = new Discord.Client()
 fs = require('fs')
+_ = require('underscore')
 
+var v = _.contains(process.argv,'--verbose')
+console.log(v)
 var variable_storage_path = 'thorium_variables.json'
 var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
 client.login(auth_discord_thorium).catch(err => {console.log('login_error'); throw err})
@@ -29,6 +32,7 @@ function set_globals_from_config_files(client){
 }
   
 function initialize_guild(guild){
+  v && console.log('initializing guild '+guild.name)
   read_guild_globals({id: "TEMPLATE"}) // reads template config file into globals["TEMPLATE"]
   globals[guild.id] = globals["TEMPLATE"]
   save_guild_parameters(guild) // creates the config file
@@ -67,7 +71,10 @@ client.on('ready', () => {
 
 client.on('message', process_message) 
 
-client.on('messageUpdate', (old_message,new_message) => process_message(new_message)) // respond to edited messages as if they were new
+client.on('messageUpdate', (old_message,new_message) => {
+  v && console.log('edit: ' + new_message.author.username + '\n  -' + old_message.content.split('\n').join('\n  -') + '\n  + ' + new_message.content.split('\n').join('\n  + ') + '\n')
+  process_message(new_message)
+}) // respond to edited messages as if they were new
 
 client.on('guildCreate', guild => initialize_guild(guild)) // called when client _joins_ a guild, despite name
 
@@ -77,6 +84,7 @@ client.on('messageReactionAdd', message_reaction => {
 
 function process_message(message) {
   var guild = message.guild
+  v && console.log(message.content)
   if (!guild) return // don't process pms at all
   if (globals[guild.id] == undefined) initialize_guild(guild)
   var x = /^[Tt]opicis:? (.*)/
@@ -98,6 +106,7 @@ function obey_member(member,guild){
   var obey = false
   obey = obey || !!(member.roles.find(item => {return globals[guild.id].obey_roles.has(item.name)}, true))
   obey = obey || member.hasPermission(['MANAGE_GUILD'],false,true,true)
+  v && console.log('obey '+member.displayName+'?', obey)
   return obey
 }
 
@@ -106,7 +115,7 @@ function respond_to_reaction(message_reaction){
   if (!guild) return // don't process pms at all
   var emoji_name = message_reaction._emoji.name 
   var reacts = message_reaction.count
-  console.log('reaction spotted: ' + emoji_name + ' in #' + message_reaction.message.channel.name)
+  v && console.log('reaction spotted: ' + emoji_name + ' in #' + message_reaction.message.channel.name)
   message = message_reaction.message
   if(is_watched(emoji_name,guild) && (reacts >= globals[guild.id].threshold) && isnt_logged_yet(message) && ('' + message)){
     log_message(message,emoji_name)
@@ -115,11 +124,11 @@ function respond_to_reaction(message_reaction){
 
 function parse_command(message,text_to_parse,privileged){
   var guild = message.channel.guild
-  var filter_regex = new RegExp("^" + globals[guild.id].bot_name_regex) 
+  var filter_regex = new RegExp("^" + globals[guild.id].bot_name_regex + "[ ,]+") 
   if (!text_to_parse.match(filter_regex)) return // make sure it has the name
   var phrase = text_to_parse.replace(filter_regex,'').toLowerCase() // cut the name off
-  phrase = phrase.replace(/,?( please)? ([^{}()\\\;]+?)(,? please.?)?$/,'$2') // cut out the pleasantries, if any
-  console.log(phrase)
+  phrase = phrase.replace(/(please )?([^{}()\\\;]+?)(,? please.?)?$/,'$2') // cut out the pleasantries, if any
+  v && console.log('command issued:', phrase)
   var user = message.member
   var x
   if (phrase.match(x = /^$/)) {
