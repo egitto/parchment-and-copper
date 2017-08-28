@@ -44,12 +44,13 @@ def get_HMAC(file):
     tail = '0'*(39-len(head))
     s = {x: [] for x in candidates}
     sample(prefix+head, candidates, tail, s)
-    for x in range(1,300):
+    alpha = 0.001
+    for x in range(1,int(1/alpha)):
       candidates = random.sample(candidates,16) # shuffle them, just in case. 
       sample(prefix+head, candidates, tail, s)
       p = t_test(*scores_to_lists(s))
       print(x, p)
-      if p < 0.0001 and x > 30:
+      if p < alpha and x > 30:
         head += biggest_key(s)*2
         break
     head = head[:-1] # backtrack; in case we went astray somewhere
