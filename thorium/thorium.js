@@ -88,11 +88,9 @@ function process_message(message) {
   }
   var obey_this = obey_member(message.member,guild)
   // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
-  if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
-    if (message.channel === log_channel(guild)){
-      message.content.split("\n").map(text_to_parse => parse_command(message,text_to_parse,obey_this))
-      save_guild_parameters(message.guild)
-    }
+  if (message.channel === log_channel(guild)){
+    message.content.split("\n").map(text_to_parse => parse_command(message,text_to_parse,obey_this))
+    save_guild_parameters(message.guild)
   }
 }
 
@@ -116,10 +114,13 @@ function respond_to_reaction(message_reaction){
 }
 
 function parse_command(message,text_to_parse,privileged){
-  var phrase = text_to_parse.replace(/^[Tt]horium,?( please)? (.+?)(,? please.?)?$/,'$2').toLowerCase()
+  var guild = message.channel.guild
+  var filter_regex = new RegExp("^" + globals[guild.id].bot_name_regex) 
+  if (!text_to_parse.match(filter_regex)) return // make sure it has the name
+  var phrase = text_to_parse.replace(filter_regex,'').toLowerCase() // cut the name off
+  phrase = phrase.replace(/,?( please)? ([^{}()\\\;]+?)(,? please.?)?$/,'$2') // cut out the pleasantries, if any
   console.log(phrase)
   var user = message.member
-  var guild = message.channel.guild
   var x
   if (phrase.match(x = /^$/)) {
     reply(message, 'I can serve. \nwatched emoji:  ' + set_to_pretty_string(globals[guild.id].watched_emojii) + '\ncontrol roles: ' + set_to_pretty_string(globals[guild.id].obey_roles) + '\nlog channel: ' + globals[guild.id].log_channel_name)

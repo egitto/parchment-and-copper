@@ -5,6 +5,7 @@
     "📓",
     "📔"
   ],
+  "bot_name_regex": "[Tt]horium",
   "log_channel_name": "thorium-logs",
   "threshold": "1",
   "obey_roles": [
