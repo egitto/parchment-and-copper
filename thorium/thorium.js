@@ -128,7 +128,7 @@ function parse_command(message,text_to_parse,privileged){
     var y = phrase.replace(x,'$2')
     if (user.roles.find('name',y)) {reply(message,"You're already in "+y+", silly!")}
     if (!is_managing_role(y,guild)) {reply(message,"I'm not managing the role "+y); list_managing(message)}
-    globals[guild.id].managed_roles.map(role => {if ((role.name === y)&& !user.roles.has(role.id) &&user.guild.roles.has(role.id)) {
+    globals[guild.id].managed_roles.map(role => {if ((role.name === y) && !user.roles.has(role.id) && user.guild.roles.has(role.id)) {
       var forbidden
       if ((forbidden = forbidden_permissions_of(guild.roles.get(role.id))).length == 0){
         user.addRole(role.id).then(
@@ -139,7 +139,7 @@ function parse_command(message,text_to_parse,privileged){
   if (phrase.match(x = /^(remove|evacuate|kidnap|rescue|save) me from (.+?)$/)) {
     var y = phrase.replace(x,'$2')
     if (!is_managing_role(y,guild)) {reply(message,"I'm not managing the role "+y); list_managing(message)}      
-    globals[guild.id].managed_roles.map(role => {if ((role.name === y)&& user.roles.has(role.id)) {
+    globals[guild.id].managed_roles.map(role => {if ((role.name === y) && user.roles.has(role.id)) {
       user.removeRole(role.id).then(
         () => message.react("✅")).catch(err => reply(message,""+err))}})
   }
@@ -252,11 +252,9 @@ function parse_command(message,text_to_parse,privileged){
   console.log('Command finished')
 }
 
-function add_role_to_member(member,role_name){}
-
 function change_role_colors(privileged,message,role_name,color){
   console.log('changing',role_name,color)
-  var role = message.guild.roles.find('name',role_name)
+  var role = message.guild.roles.filterArray(x => {return x.name.toLowerCase() === role_name})[0]
   if (!role) {console.log('role '+role_name+' does not exist'); return false}
   var only_member = (role.members.array().length === 1 && role.members.array()[0].user.id === message.author.id)
   if (privileged || only_member){
@@ -281,7 +279,7 @@ function rename_role(initial,final,message){
     reply(message,"Already exist role(s) called "+final)
   }else{
     initial_roles[0].setName(final).then(role => {
-      globals[guild.id].managed_roles.push({id: role.id, name: role.name})
+      globals[guild.id].managed_roles.push({id: role.id, name: role.name.toLowerCase()})
       reply(message,"Role renamed.")
       unmanage_role(initial, message)
     }).catch(err => reply(message,"Error: "+err))
@@ -289,7 +287,7 @@ function rename_role(initial,final,message){
 }
 
 function manage_role(y,message,force){
-  var named_roles = message.channel.guild.roles.findAll('name',y)
+  var named_roles = message.channel.guild.roles.filterArray(x => {return y === x.name.toLowerCase()})
   var guild = message.guild
   if (globals[guild.id].obey_roles.has(y)){
     reply(message,"Can't manage an obeyed role")
@@ -299,12 +297,12 @@ function manage_role(y,message,force){
     reply(message,"Already exist role(s) with that name; force?")
     if (force && named_roles.length == 1){
       var role = named_roles[0]
-      globals[guild.id].managed_roles.push({id: role.id, name: role.name})
+      globals[guild.id].managed_roles.push({id: role.id, name: role.name.toLowerCase()})
       reply(message,"Forcing management anyway")
     }
   }else{
     message.channel.guild.createRole({name: y, mentionable: true}).then(role => {
-      globals[guild.id].managed_roles.push({id: role.id, name: role.name})
+      globals[guild.id].managed_roles.push({id: role.id, name: role.name.toLowerCase()})
       reply(message,"New role \""+y+"\" created")
     }).catch(err => reply(message,"Error: "+err))
   }list_managing(message)
@@ -312,7 +310,7 @@ function manage_role(y,message,force){
 
 function unmanage_role(role_name,message){
   var guild = message.guild
-  globals[guild.id].managed_roles = globals[guild.id].managed_roles.filter(role => {return role.name !== role_name})
+  globals[guild.id].managed_roles = globals[guild.id].managed_roles.filter(role => {return role.name.toLowerCase() !== role_name})
   list_managing(message)
 }
 
