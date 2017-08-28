@@ -77,6 +77,7 @@ client.on('messageReactionAdd', message_reaction => {
 
 function process_message(message) {
   var guild = message.guild
+  if (!guild) return // don't process pms at all
   if (globals[guild.id] == undefined) initialize_guild(guild)
   var x = /^[Tt]opicis:? (.*)/
   if (message.content.match(x)){
@@ -85,14 +86,12 @@ function process_message(message) {
     new_message.content = message.content.replace(x,'topicis_bot: $1')
     log_message(new_message)
   }
-  if (message.member){ // if the message is a pm, this will be null
-    var obey_this = obey_member(message.member,guild)
-    // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
-    if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
-      if (message.channel === log_channel(guild)){
-        message.content.split("\n").map(text_to_parse => parse_command(message,text_to_parse,obey_this))
-        save_guild_parameters(message.guild)
-      }
+  var obey_this = obey_member(message.member,guild)
+  // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
+  if (message.content.match(/^[Tt]horium,? [^{}()\\]*$/)){
+    if (message.channel === log_channel(guild)){
+      message.content.split("\n").map(text_to_parse => parse_command(message,text_to_parse,obey_this))
+      save_guild_parameters(message.guild)
     }
   }
 }
