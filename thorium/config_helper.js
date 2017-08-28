@@ -6,7 +6,7 @@ var auth = {}
 
 function is_yes(input) {return (input == "" || input == "Y" || input == "y" || input == "yes")}
 
-function is_n(input) {return (input == "N" || input == "n" || input == "no")}
+function is_no(input) {return (input == "N" || input == "n" || input == "no")}
 
 function input1(){
   console.log("To configure Thorium, you will need to:\n1) register a bot at https://discordapp.com/developers/applications/me")
@@ -16,7 +16,7 @@ function input1(){
     if(is_yes(d)){
       opn("https://discordapp.com/developers/applications/me")
       input2()
-    }else if(is_n(d)){
+    }else if(is_no(d)){
       input2()
     }else{
       console.log('Unrecognized input.\nopen https://discordapp.com/developers/applications/me now? Y/n')
@@ -51,7 +51,7 @@ function input4(){
     if(is_yes(d)){
       fs.writeFileSync(authpath, JSON.stringify(auth))
       input5()
-    }else if(is_n(d)){
+    }else if(is_no(d)){
       input5()
     }else{
       console.log('Unrecognized input.')
