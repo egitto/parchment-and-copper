@@ -4,8 +4,7 @@ fs = require('fs')
 _ = require('underscore')
 
 var v = _.contains(process.argv,'--verbose')
-console.log(v)
-var variable_storage_path = 'thorium_variables.json'
+v && console.log('verbose enabled')
 var auth_discord_thorium = JSON.parse(fs.readFileSync('auth.thorium.json'))['auth_discord_thorium']
 client.login(auth_discord_thorium).catch(err => {console.log('login_error'); throw err})
 
@@ -96,6 +95,7 @@ function process_message(message) {
   }
   var obey_this = obey_member(message.member,guild)
   // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
+  v && console.log(message.channel, "===", log_channel(guild), "?")
   if (message.channel === log_channel(guild)){
     message.content.split("\n").map(text_to_parse => parse_command(message,text_to_parse,obey_this))
     save_guild_parameters(message.guild)
@@ -254,17 +254,17 @@ function parse_command(message,text_to_parse,privileged){
     response = 'Permitted permission "'+y+'"'
   }
   if (phrase === 'dump parameters') {
-    response = '```'+JSON_pretty(globals)+'```'
+    response = '```'+JSON_pretty(globals[guild.id])+'```'
   }
   if (phrase === 'shut down without confirmation') {
     throw 'shut down by command'
   }
   if (response) {reply(message,response)}
-  console.log('Command finished')
+  v && console.log('Command finished')
 }
 
 function change_role_colors(privileged,message,role_name,color){
-  console.log('changing',role_name,color)
+  v && console.log('changing',role_name,color)
   var role = message.guild.roles.filterArray(x => {return x.name.toLowerCase() === role_name})[0]
   if (!role) {console.log('role '+role_name+' does not exist'); return false}
   var only_member = (role.members.array().length === 1 && role.members.array()[0].user.id === message.author.id)
@@ -276,7 +276,7 @@ function change_role_colors(privileged,message,role_name,color){
 }
 
 function rename_role(initial,final,message){
-  console.log("renaming "+initial+" to "+final)
+  v && console.log("renaming "+initial+" to "+final)
   var guild = message.guild
   var initial_roles = message.channel.guild.roles.findAll('name',initial)
   var final_roles = message.channel.guild.roles.findAll('name',final)
@@ -341,12 +341,7 @@ function role_members_names(message,role_name){
 }
 
 function reply(message,content){
-  var guild = message.guild
-  if (log_channel(guild)){
-    return log_channel(guild).send(''+message.member+', '+content,{disableEveryone: true})
-  }else{ 
-    report_error_on_servermeta(message,globals[guild.id].log_channel_name+' not found; run change log channel $channel to fix')
-  }
+  return message.channel.send(''+message.member+', '+content,{disableEveryone: true})
   // return reply(message,content,{disableEveryone: true}) 
 }
 
