@@ -60,8 +60,10 @@ function set_to_pretty_string(set){
 var JSON_pretty = x => JSON.stringify(x,null,'  ')
 var save_guild_parameters = guild => fs.writeFileSync(guild_variables_path(guild),JSON_pretty(globals[guild.id]))
 
-console.log('loading...')
 
+console.log('loading...')
+v && console.log('Verbose mode enabled')
+                 
 client.on('ready', () => {
   console.log('Connected, loading config...')
   set_globals_from_config_files(client)
