@@ -323,8 +323,10 @@ function manage_role(y,message,force){
 
 function unmanage_role(role_name,message){
   var guild = message.guild
-  globals[guild.id].managed_roles = globals[guild.id].managed_roles.filter(role => {return role.name.toLowerCase() !== role_name})
-  list_managing(message)
+  var y = _.partition(globals[guild.id].managed_roles, role => {return role.name.toLowerCase() !== role_name})
+  globals[guild.id].managed_roles = y[0]
+  // list_managing(message)
+  reply(message,"unmanaged: "+array_to_string(y[1].map(x => x.name)))
 }
 
 function list_managing(message){
