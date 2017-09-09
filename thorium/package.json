@@ -4,6 +4,7 @@
   "description": "A simple bot based on discord.js for logging messages in discord servers that have recieved reactions from users",
   "main": "thorium.js",
   "dependencies": {
+    "ajax": "0.0.4",
     "async": "^2.5.0",
     "discord.js": "^11.1.0",
     "opn": "^5.1.0",
