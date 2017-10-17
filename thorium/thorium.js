@@ -77,8 +77,6 @@ client.on('messageUpdate', (old_message,new_message) => {
   process_message(new_message)
 }) // respond to edited messages as if they were new
 
-client.on('guildCreate', guild => initialize_guild(guild)) // called when client _joins_ a guild, despite name
-
 client.on('messageReactionAdd', message_reaction => {
   respond_to_reaction(message_reaction)
 }) 
@@ -97,7 +95,7 @@ function process_message(message) {
   }
   var obey_this = obey_member(message.member,guild)
   // console.log(obey_this + ' ' + message.member.user.username + '/' + message.member.nickname + '\n  ' + message.content)
-  v && console.log(message.channel, "===", log_channel(guild), "?")
+  v && console.log(message.channel.name, "==", log_channel(guild).name, "?")
   if (message.channel === log_channel(guild)){
     message.content.split("\n").map(text_to_parse => parse_command(message,text_to_parse,obey_this))
     save_guild_parameters(message.guild)
