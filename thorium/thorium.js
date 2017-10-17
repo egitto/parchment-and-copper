@@ -302,21 +302,27 @@ function manage_role(y,message,force){
   var guild = message.guild
   if (globals[guild.id].obey_roles.has(y)){
     reply(message,"Can't manage an obeyed role")
+    return
   }else if(is_managing_role(y,guild)){
     reply(message,"Already managing a role by that name")
-  }else if (named_roles.length > 0){
-    reply(message,"Already exist role(s) with that name; force?")
-    if (force && named_roles.length == 1){
-      var role = named_roles[0]
-      globals[guild.id].managed_roles.push({id: role.id, name: role.name.toLowerCase()})
-      reply(message,"Forcing management anyway")
-    }
-  }else{
+    return
+  }else if (force ^ (named_roles.length == 1)){
+    reply(message,"Usage: `force manage` iff role already exists, `manage` otherwise")
+    return
+  }
+  if (named_roles.length == 1){
+    var role = named_roles[0]
+    globals[guild.id].managed_roles.push({id: role.id, name: role.name.toLowerCase()})
+    reply(message,"Forcing management of role \""+y+"\"")
+  }else if (named_roles.length == 0){
     message.channel.guild.createRole({name: y, mentionable: true}).then(role => {
       globals[guild.id].managed_roles.push({id: role.id, name: role.name.toLowerCase()})
       reply(message,"New role \""+y+"\" created")
     }).catch(err => reply(message,"Error: "+err))
-  }list_managing(message)
+  }else if (named_roles.length > 1){
+    reply(message,"Multiple roles have that name, doing nothing")
+  }
+  list_managing(message)
 }
 
 function unmanage_role(role_name,message){
