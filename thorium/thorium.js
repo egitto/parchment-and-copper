@@ -117,7 +117,7 @@ function respond_to_reaction(message_reaction){
   var reacts = message_reaction.count
   v && console.log('reaction spotted: ' + emoji_name + ' in #' + message_reaction.message.channel.name)
   message = message_reaction.message
-  if(is_watched(emoji_name,guild) && (reacts >= globals[guild.id].threshold) && isnt_logged_yet(message) && ('' + message)){
+  if(is_watched(emoji_name,guild) && (reacts >= globals[guild.id].threshold) && ('' + message)){
     log_message(message,emoji_name)
   }
 }
@@ -374,14 +374,15 @@ function is_watched(emoji,guild){
   // return true
 }
 
-function isnt_logged_yet(message){
+function already_logged(message){
   var logged_react = !!message.reactions.find('me', true)
   console.log('already logged_react: '+ logged_react)
-  return !logged_react
+  return logged_react
 }
 
 function log_message(message,emoji_name){
     // message = messageReaction.message
+  if (already_logged(message)){return}
   var guild = message.guild
   console.log(emoji_name)
   var emoji_name = emoji_name || globals[guild.id].flag_logged_emoji
