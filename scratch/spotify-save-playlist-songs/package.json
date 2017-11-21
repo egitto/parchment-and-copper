@@ -1,0 +1,17 @@
+{
+  "name": "spotify-save-playlist-songs",
+  "version": "1.0.0",
+  "description": "Using spotify-web-api-node, save all songs in a user's playlists to that user's library. Keeps a record of songs so saved in an additional playlist.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "opn": "^5.1.0",
+    "request": "^2.83.0",
+    "spotify-web-api-node": "^2.5.0"
+  }
+}
